@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/test.dart';
-
+import 'screens/landing_page.dart';
 void main() {
   runApp(AmchamAdminWeb());
 }
@@ -12,7 +12,7 @@ class AmchamAdminWeb extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Amcham Admin Page',
-      home: test(),
+      home: LandingPage(),
     );
   }
 }
