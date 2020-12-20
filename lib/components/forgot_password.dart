@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:amcham_app_v2/screens/forgot_password_screen.dart';
+import 'package:amcham_admin_web/screens/forgot_password_screen.dart';
 
 class ForgotPassword extends StatelessWidget {
   ForgotPassword();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amcham_app_v2/constants.dart';
-import 'package:amcham_app_v2/size_config.dart';
+import 'package:amcham_admin_web/constants.dart';
+import 'package:amcham_admin_web/size_config.dart';
 
 class AmchamLogo extends StatelessWidget {
   @override
