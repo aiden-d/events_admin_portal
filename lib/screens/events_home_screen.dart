@@ -1,3 +1,4 @@
+import 'package:amcham_admin_web/screens/create_event_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
@@ -24,7 +25,10 @@ class _EventsHomeScreenState extends State<EventsHomeScreen> {
           Center(
             child: RoundedButton(
               onPressed: () {
-                //_alertDialogBuilder();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CreateEventScreen()));
               },
               title: 'Create Event',
               textStyle: Constants.blueText,

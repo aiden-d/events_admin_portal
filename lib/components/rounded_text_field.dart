@@ -16,22 +16,25 @@ class RoundedTextField extends StatelessWidget {
   final String textValue;
   final double shadowOpacity;
   final BoxBorder border;
-  RoundedTextField(
-      {this.title,
-      this.colour,
-      this.radius,
-      this.textStyle,
-      this.height,
-      this.width,
-      this.hintText,
-      this.onChanged,
-      this.onSubmitted,
-      this.focusNode,
-      this.textInputAction,
-      this.isPasswordField,
-      this.textValue,
-      this.shadowOpacity,
-      this.border});
+  final bool isMultiLine;
+  RoundedTextField({
+    this.title,
+    this.colour,
+    this.radius,
+    this.textStyle,
+    this.height,
+    this.width,
+    this.hintText,
+    this.onChanged,
+    this.onSubmitted,
+    this.focusNode,
+    this.textInputAction,
+    this.isPasswordField,
+    this.textValue,
+    this.shadowOpacity,
+    this.border,
+    this.isMultiLine,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +60,10 @@ class RoundedTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius != null ? radius : 15)),
         child: Center(
           child: TextField(
+            keyboardType: isMultiLine == true
+                ? TextInputType.multiline
+                : TextInputType.name,
+            maxLines: isMultiLine == true ? null : 1,
             controller: TextEditingController(text: textValue),
             obscureText: _isPasswordField,
             textInputAction: textInputAction,
