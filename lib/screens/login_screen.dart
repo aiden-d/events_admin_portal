@@ -63,7 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_createAccountFeedback != null) {
       _alertDialogBuilder('Error', _createAccountFeedback);
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ChooserScreen()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => ChooserScreen()));
     }
     setState(() {
       isLoading = false;
@@ -180,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading: isLoading,
                     title: 'Login',
                     textStyle: Constants.blueText,
-                    width: 400,
+                    width: 150,
                     height: 60,
                     radius: 15,
                   ),

@@ -23,45 +23,48 @@ class _HomePageState extends State<HomePage> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          body: Container(
-            padding: EdgeInsets.all(50),
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: SizeConfig().getBlockSizeVertical() * 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Hero(tag: 'logo', child: AmchamLogo()),
-                  ],
-                ),
-                SizedBox(
-                  height: SizeConfig().getBlockSizeVertical() * 5,
-                ),
-                RoundedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()));
-                  },
-                  title: 'Login',
-                  colour: Colors.white,
-                  textStyle: Constants.blueText,
-                  radius: 15,
-                  height: 80,
-                  width: 1000,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-
-                SizedBox(
-                  height: 30,
-                ),
-                ForgotPassword(),
-              ],
+          body: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.all(50),
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: SizeConfig().getBlockSizeVertical() * 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Hero(tag: 'logo', child: AmchamLogo()),
+                    ],
+                  ),
+                  SizedBox(
+                    height: SizeConfig().getBlockSizeVertical() * 5,
+                  ),
+                  RoundedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreen()));
+                    },
+                    title: 'Login',
+                    colour: Colors.white,
+                    textStyle: Constants.blueText,
+                    radius: 15,
+                    height: 80,
+                    width: 150,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  ForgotPassword(),
+                ],
+              ),
             ),
           ),
         ),
