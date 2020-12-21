@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
-
 class Constants {
   static const num = 800;
   static const regularHeading = TextStyle(
       fontSize: 18.0, fontWeight: FontWeight.w600, color: Colors.black);
   static const logoTitleStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white);
+  static const logoTitleStyleError =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red);
   static const logoTitleStyleRed = TextStyle(
     fontSize: 30,
     fontWeight: FontWeight.bold,
