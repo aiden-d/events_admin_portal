@@ -24,7 +24,7 @@ class _ChooserScreenState extends State<ChooserScreen> {
         children: [
           Center(
             child: Text(
-              'Welcome to the admin portal',
+              'Welcome _Name to the Admin Portal',
               style: Constants.logoTitleStyle,
             ),
           ),

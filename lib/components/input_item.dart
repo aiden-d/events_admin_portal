@@ -7,31 +7,40 @@ class InputItem extends StatelessWidget {
   final String hint;
   final Function(String) onChanged;
   final bool isMultiLine;
+  final int width;
+  final double height;
+  final bool isNumber;
+  final int maxLength;
+
   InputItem({
     @required this.title,
     @required this.hint,
     @required this.onChanged,
+    this.maxLength,
     this.isMultiLine,
+    this.width,
+    this.height,
+    this.isNumber,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: Constants.logoTitleStyle,
-          ),
-          RoundedTextField(
-            isMultiLine: isMultiLine,
-            hintText: hint,
-            width: 300,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Text(
+          title,
+          style: Constants.logoTitleStyle,
+        ),
+        RoundedTextField(
+          maxLength: maxLength,
+          isNumber: isNumber,
+          isMultiLine: isMultiLine,
+          hintText: hint,
+          width: width != null ? width : 300,
+          height: height != null ? height : null,
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }

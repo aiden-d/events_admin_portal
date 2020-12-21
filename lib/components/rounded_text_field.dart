@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RoundedTextField extends StatelessWidget {
   final Color colour;
@@ -17,6 +18,8 @@ class RoundedTextField extends StatelessWidget {
   final double shadowOpacity;
   final BoxBorder border;
   final bool isMultiLine;
+  final bool isNumber;
+  final int maxLength;
   RoundedTextField({
     this.title,
     this.colour,
@@ -34,6 +37,8 @@ class RoundedTextField extends StatelessWidget {
     this.shadowOpacity,
     this.border,
     this.isMultiLine,
+    this.isNumber,
+    this.maxLength,
   });
 
   @override
@@ -60,6 +65,12 @@ class RoundedTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius != null ? radius : 15)),
         child: Center(
           child: TextField(
+            maxLength: maxLength,
+            inputFormatters: isNumber == true
+                ? [
+                    WhitelistingTextInputFormatter.digitsOnly,
+                  ]
+                : [],
             keyboardType: isMultiLine == true
                 ? TextInputType.multiline
                 : TextInputType.name,
@@ -71,6 +82,7 @@ class RoundedTextField extends StatelessWidget {
             focusNode: focusNode,
             onSubmitted: onSubmitted,
             decoration: InputDecoration(
+              counterText: '',
               border: InputBorder.none,
               hintText: hintText != null ? hintText : 'Enter a search term',
               hintStyle: TextStyle(),
