@@ -22,6 +22,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       firebase_storage.FirebaseStorage.instance;
   bool isMembersOnly = false;
 
+  bool isLoading = false;
+
   //input variables
   String title;
   String summary;
@@ -480,12 +482,24 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         width: 20,
                       ),
                       RoundedButton(
+                        isLoading: isLoading,
                         width: 50,
                         title: 'Create Event',
                         onPressed: () async {
                           //TODO impiment is loading
+                          setState(() {
+                            isLoading = true;
+                          });
 
-                          await validateAndUpload();
+                          bool isGood = await validateAndUpload();
+                          setState(() {
+                            isLoading = false;
+                          });
+
+                          if (isGood == true) {
+                            _alertDialogBuilder('Finished',
+                                'Your event has been uploaded and should now appear on the app.');
+                          }
                         },
                       ),
                     ],
