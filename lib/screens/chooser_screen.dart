@@ -3,6 +3,7 @@ import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/screens/events_home_screen.dart';
 import 'package:amcham_admin_web/screens/landing_page.dart';
+import 'package:amcham_admin_web/screens/manage_admin_emails.dart';
 import 'package:amcham_admin_web/screens/member_email_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,21 @@ class _ChooserScreenState extends State<ChooserScreen> {
                         builder: (context) => MemberEmailManager()));
               },
               title: 'Manage Member Emails',
+              textStyle: Constants.blueText,
+              width: 150,
+              height: 60,
+              radius: 15,
+            ),
+          ),
+          Center(
+            child: RoundedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ManageAdminMembers()));
+              },
+              title: 'Manage Admin Members',
               textStyle: Constants.blueText,
               width: 150,
               height: 60,

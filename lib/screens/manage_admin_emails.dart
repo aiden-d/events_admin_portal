@@ -1,20 +1,20 @@
-import 'package:amcham_admin_web/components/rounded_button.dart';
-import 'package:amcham_admin_web/components/rounded_text_field.dart';
-import 'package:amcham_admin_web/constants.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:amcham_admin_web/constants.dart';
+import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:amcham_admin_web/components/rounded_text_field.dart';
 
 final _firestore = Firestore.instance;
+
 final CollectionReference admin =
     FirebaseFirestore.instance.collection('Admin');
 
-class MemberEmailManager extends StatefulWidget {
+class ManageAdminMembers extends StatefulWidget {
   @override
-  _MemberEmailManagerState createState() => _MemberEmailManagerState();
+  _ManageAdminMembersState createState() => _ManageAdminMembersState();
 }
 
-class _MemberEmailManagerState extends State<MemberEmailManager> {
+class _ManageAdminMembersState extends State<ManageAdminMembers> {
   Future<void> alertDialogBuilder(String title, String info) async {
     return showDialog(
         barrierDismissible: false,
@@ -119,12 +119,12 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
     }
     newEmailEndings = [];
     await admin
-        .doc('member_emails')
-        .update({'member_emails': endingsString})
+        .doc('admin_permissions')
+        .update({'admin_emails': endingsString})
         .then((value) => print("Updated"))
         .catchError((error) => print("Failed to update: $error"));
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => MemberEmailManager()));
+        context, MaterialPageRoute(builder: (context) => ManageAdminMembers()));
 
     //TODO show error
   }
@@ -136,7 +136,7 @@ class EmailEndingStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
-      future: admin.doc('member_emails').get(),
+      future: admin.doc('admin_permissions').get(),
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasError) {
@@ -146,7 +146,7 @@ class EmailEndingStream extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           items = [];
           Map<String, dynamic> data = snapshot.data.data();
-          List endings = data['member_emails'];
+          List endings = data['admin_emails'];
 
           for (String e in endings) {
             items.add(EmailEndingItem(
@@ -185,10 +185,11 @@ class EmailEndingItem extends StatelessWidget {
         ? Row(
             children: [
               RoundedTextField(
+                width: 400,
                 onChanged: (value) {
                   newEmailEnding = value;
                 },
-                hintText: 'Enter email ending',
+                hintText: 'Enter admin email',
                 textValue: emailEnding,
               ),
               // IconButton(
