@@ -9,6 +9,7 @@ import 'package:amcham_admin_web/components/amcham_logo.dart';
 import 'package:amcham_admin_web/components/forgot_password.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'forgot_password_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -63,8 +64,23 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_createAccountFeedback != null) {
       _alertDialogBuilder('Error', _createAccountFeedback);
     } else {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ChooserScreen()));
+      List emails;
+      await FirebaseFirestore.instance
+          .collection('Admin')
+          .doc('admin_permissions')
+          .get()
+          .then((value) => emails = value.data()['admin_emails']);
+      if (emails != null) {
+        for (var email in emails) {
+          if (email.toString() == FirebaseAuth.instance.currentUser.email) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ChooserScreen()));
+            return;
+          }
+          _alertDialogBuilder('Error', 'You are not an admin');
+          FirebaseAuth.instance.signOut();
+        }
+      }
     }
     setState(() {
       isLoading = false;

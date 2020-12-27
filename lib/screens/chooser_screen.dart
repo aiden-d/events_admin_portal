@@ -2,7 +2,9 @@ import 'package:amcham_admin_web/components/app_bar.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/screens/events_home_screen.dart';
+import 'package:amcham_admin_web/screens/landing_page.dart';
 import 'package:amcham_admin_web/screens/member_email_manager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChooserScreen extends StatefulWidget {
@@ -74,7 +76,10 @@ class _ChooserScreenState extends State<ChooserScreen> {
           ),
           Center(
             child: RoundedButton(
-              onPressed: () {},
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+                return LandingPage();
+              },
               title: 'Logout',
               textStyle: Constants.blueText,
               width: 150,

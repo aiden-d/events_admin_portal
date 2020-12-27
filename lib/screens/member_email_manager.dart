@@ -1,6 +1,7 @@
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -14,9 +15,37 @@ class MemberEmailManager extends StatefulWidget {
 }
 
 class _MemberEmailManagerState extends State<MemberEmailManager> {
-  List emailEndings;
-  List<EmailEndingItem> newEmailEndings = [];
+  static _MemberEmailManagerState currentState;
+  Future<void> alertDialogBuilder(String title, String info) async {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(title != null ? title : "Error"),
+            content: Container(
+              child: Text(info),
+            ),
+            actions: [
+              FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Close Dialog"))
+            ],
+          );
+        });
+  }
+
+  static List<EmailEndingItem> newEmailEndings = [];
   bool isLoading = false;
+  @override
+  void initState() {
+    newEmailEndings = [];
+    currentState = this;
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +57,21 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             EmailEndingStream(),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: newEmailEndings,
             ),
             RoundedButton(
                 title: 'ADD NEW',
                 onPressed: () {
                   setState(() {
-                    newEmailEndings.add(EmailEndingItem(emailEnding: ''));
+                    newEmailEndings.add(EmailEndingItem(
+                      emailEnding: '',
+                      isFromWeb: false,
+                    ));
                   });
                 }),
             RoundedButton(
@@ -59,7 +93,7 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
     );
   }
 
-  Future<void> publishChanges() {
+  Future<void> publishChanges() async {
     List<String> endingsString = [];
     for (var e in EmailEndingStream.items) {
       if (e == null) {
@@ -67,8 +101,11 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
         print('error');
         return null;
       }
-      endingsString
-          .add(e.newEmailEnding != null ? e.newEmailEnding : e.emailEnding);
+      if (e.newEmailEnding == "") {
+      } else {
+        endingsString
+            .add(e.newEmailEnding != null ? e.newEmailEnding : e.emailEnding);
+      }
     }
     for (var e in newEmailEndings) {
       if (e == null) {
@@ -76,14 +113,19 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
         print('error');
         return null;
       }
-      endingsString.add(e.newEmailEnding);
+      if (e.newEmailEnding == "") {
+      } else {
+        endingsString.add(e.newEmailEnding);
+      }
     }
     newEmailEndings = [];
-    return admin
+    await admin
         .doc('member_emails')
         .update({'member_emails': endingsString})
         .then((value) => print("Updated"))
         .catchError((error) => print("Failed to update: $error"));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => MemberEmailManager()));
 
     //TODO show error
   }
@@ -110,10 +152,14 @@ class EmailEndingStream extends StatelessWidget {
           for (String e in endings) {
             items.add(EmailEndingItem(
               emailEnding: e,
+              isFromWeb: true,
             ));
           }
-          return Column(
-            children: items,
+          return Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: items,
+            ),
           );
         }
 
@@ -125,16 +171,56 @@ class EmailEndingStream extends StatelessWidget {
 
 class EmailEndingItem extends StatelessWidget {
   final String emailEnding;
-  EmailEndingItem({@required this.emailEnding});
+  final bool isFromWeb;
+
+  EmailEndingItem({
+    @required this.emailEnding,
+    @required this.isFromWeb,
+  });
   String newEmailEnding;
+  bool isLoading = false;
+  bool isDeleted = false;
   @override
   Widget build(BuildContext context) {
-    return RoundedTextField(
-      onChanged: (value) {
-        newEmailEnding = value;
-      },
-      hintText: 'Enter email ending',
-      textValue: emailEnding,
-    );
+    return isDeleted == false
+        ? Row(
+            children: [
+              RoundedTextField(
+                onChanged: (value) {
+                  newEmailEnding = value;
+                },
+                hintText: 'Enter email ending',
+                textValue: emailEnding,
+              ),
+              // IconButton(
+              //   icon: Icon(
+              //     CupertinoIcons.minus_circle,
+              //     color: Colors.red,
+              //   ),
+              //   onPressed: () async {
+              //     if (isFromWeb == false) {
+              //       _MemberEmailManagerState.newEmailEndings.remove(this);
+              //     } else {
+              //       print(EmailEndingStream.items.remove(this));
+              //       List<EmailEndingItem> items = EmailEndingStream.items;
+              //       List<String> itemsString = [];
+              //       for (var i in items) {
+              //         itemsString.add(i.newEmailEnding != null
+              //             ? i.newEmailEnding
+              //             : i.emailEnding);
+              //       }
+              //       await admin
+              //           .doc('member_emails')
+              //           .update({'member_emails': itemsString})
+              //           .then((value) => print("User Updated"))
+              //           .catchError(
+              //               (error) => print("Failed to update user: $error"));
+              //       isDeleted = true;
+              //     }
+              //   },
+              // ),
+            ],
+          )
+        : SizedBox();
   }
 }
