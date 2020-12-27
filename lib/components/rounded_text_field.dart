@@ -20,6 +20,7 @@ class RoundedTextField extends StatelessWidget {
   final bool isMultiLine;
   final bool isNumber;
   final int maxLength;
+
   RoundedTextField({
     this.title,
     this.colour,

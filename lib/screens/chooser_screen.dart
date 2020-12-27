@@ -2,6 +2,7 @@ import 'package:amcham_admin_web/components/app_bar.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/screens/events_home_screen.dart';
+import 'package:amcham_admin_web/screens/member_email_manager.dart';
 import 'package:flutter/material.dart';
 
 class ChooserScreen extends StatefulWidget {
@@ -50,6 +51,21 @@ class _ChooserScreenState extends State<ChooserScreen> {
             child: RoundedButton(
               onPressed: () {},
               title: 'News',
+              textStyle: Constants.blueText,
+              width: 150,
+              height: 60,
+              radius: 15,
+            ),
+          ),
+          Center(
+            child: RoundedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MemberEmailManager()));
+              },
+              title: 'Manage Member Emails',
               textStyle: Constants.blueText,
               width: 150,
               height: 60,
