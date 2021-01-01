@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/constants.dart';
@@ -6,28 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:amcham_admin_web/components/item_manager.dart';
 
-final _firestore = Firestore.instance;
-final _managerStream = ManageItemStream(
-  collectionName: 'Admin',
-  documentName: 'member_emails',
-  variableName: 'member_emails',
-  hintText: 'Enter email ending',
-  isDocumentSnapshot: true,
+final _managerStream = new ManageItemStream(
+  collectionName: 'Events',
+  documentName: null,
+  variableName: 'title',
+  isDocumentSnapshot: false,
+  hintText: 'Enter title',
 );
 
-class MemberEmailManager extends StatefulWidget {
+class ManageEventsScreen extends StatefulWidget {
   @override
-  _MemberEmailManagerState createState() => _MemberEmailManagerState();
+  _ManageEventsScreenState createState() => _ManageEventsScreenState();
 }
 
-class _MemberEmailManagerState extends State<MemberEmailManager> {
+class _ManageEventsScreenState extends State<ManageEventsScreen> {
   bool isLoading = false;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,19 +40,6 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
               children: _managerStream.getNewValues(),
             ),
             RoundedButton(
-                title: 'ADD NEW',
-                onPressed: () {
-                  setState(() {
-                    List<ManagerItem> val = _managerStream.getNewValues();
-                    val.add(ManagerItem(
-                      hintText: 'Enter email ending',
-                      prevValue: '',
-                      isFromWeb: false,
-                    ));
-                    _managerStream.setNewValues(val);
-                  });
-                }),
-            RoundedButton(
                 isLoading: isLoading,
                 title: 'PUBLISH',
                 onPressed: () async {
@@ -69,7 +50,7 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => MemberEmailManager()));
+                            builder: (context) => ManageEventsScreen()));
                   });
                   setState(() {
                     isLoading = false;

@@ -193,23 +193,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     //upload to firebase
     CollectionReference eventsFB =
         FirebaseFirestore.instance.collection('Events');
-    await eventsFB
-        .add({
-          'category': category,
-          'date': getDateInt(date),
-          'end_time': getTimeInt(endTime),
-          'image_name': imageNameOnFirebase,
-          'info': info,
-          'isMembersOnly': isMembersOnly,
-          'link': link,
-          'price': price,
-          'start_time': getTimeInt(startTime),
-          'summary': summary,
-          'title': title,
-          'type': type,
-        })
-        .then((value) => print("User Added"))
-        .catchError((error) => _alertDialogBuilder('Error', error));
+    DocumentReference ref = await eventsFB.add({});
+    await eventsFB.doc(ref.id).set({
+      'category': category,
+      'date': getDateInt(date),
+      'end_time': getTimeInt(endTime),
+      'image_name': imageNameOnFirebase,
+      'info': info,
+      'isMembersOnly': isMembersOnly,
+      'link': link,
+      'price': price,
+      'start_time': getTimeInt(startTime),
+      'summary': summary,
+      'title': title,
+      'type': type,
+      'id': ref.id,
+    });
     return true;
   }
 

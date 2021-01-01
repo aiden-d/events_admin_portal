@@ -1,4 +1,5 @@
 import 'package:amcham_admin_web/screens/create_event_screen.dart';
+import 'package:amcham_admin_web/screens/manage_events_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
@@ -40,6 +41,10 @@ class _EventsHomeScreenState extends State<EventsHomeScreen> {
           Center(
             child: RoundedButton(
               onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ManageEventsScreen()));
                 //_alertDialogBuilder();
               },
               title: 'Manage Events',

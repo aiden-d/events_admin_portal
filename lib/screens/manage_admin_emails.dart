@@ -5,13 +5,15 @@ import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
-import 'package:amcham_admin_web/components/manager_item_components.dart';
+import 'package:amcham_admin_web/components/item_manager.dart';
 
 final _firestore = Firestore.instance;
 final _managerStream = new ManageItemStream(
   collectionName: 'Admin',
   documentName: 'admin_permissions',
   variableName: 'admin_emails',
+  isDocumentSnapshot: true,
+  hintText: 'Enter email',
 );
 
 class ManageAdminMembers extends StatefulWidget {
