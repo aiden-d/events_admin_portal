@@ -28,7 +28,8 @@ class _ChooserScreenState extends State<ChooserScreen> {
         children: [
           Center(
             child: Text(
-              'Welcome _Name to the Admin Portal',
+              'Welcome ${FirebaseAuth.instance.currentUser.email} to the Admin Portal',
+              //TODO change to actual name
               style: Constants.logoTitleStyle,
             ),
           ),
