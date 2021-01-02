@@ -1,3 +1,5 @@
+import 'package:amcham_admin_web/screens/create_event_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'rounded_text_field.dart';
@@ -8,6 +10,7 @@ class ManageItemStream extends StatelessWidget {
   final String documentName;
   final String variableName;
   final bool isDocumentSnapshot;
+  final bool isEditable;
   final String hintText;
 
   List<ManagerItem> newValues = [];
@@ -18,6 +21,7 @@ class ManageItemStream extends StatelessWidget {
     @required this.variableName,
     @required this.isDocumentSnapshot,
     @required this.hintText,
+    this.isEditable,
   });
   final _firestore = FirebaseFirestore.instance;
   List<ManagerItem> getNewValues() {
@@ -83,6 +87,8 @@ class ManageItemStream extends StatelessWidget {
                     prevValue: title,
                     isFromWeb: true,
                     docID: doc.id,
+                    data: data,
+                    isEditable: true,
                   ));
                 }
                 return Center(
@@ -170,12 +176,16 @@ class ManagerItem extends StatelessWidget {
   final bool isFromWeb;
   final String hintText;
   final String docID;
+  final Map<String, dynamic> data;
+  final bool isEditable;
 
   ManagerItem({
     @required this.prevValue,
     @required this.isFromWeb,
     @required this.hintText,
     this.docID,
+    this.data,
+    this.isEditable,
   });
   String newValue;
   bool isLoading = false;
@@ -193,6 +203,23 @@ class ManagerItem extends StatelessWidget {
                 hintText: hintText,
                 textValue: prevValue,
               ),
+              isEditable == true
+                  ? IconButton(
+                      icon: Icon(CupertinoIcons.pencil_circle),
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CreateEventScreen(
+                                      data: data,
+                                    )));
+                      })
+                  : SizedBox(),
+              IconButton(
+                  icon: Icon(CupertinoIcons.xmark_circle),
+                  color: Colors.red,
+                  onPressed: () {}),
             ],
           )
         : SizedBox();

@@ -23,6 +23,7 @@ class ManageAdminMembers extends StatefulWidget {
 
 class _ManageAdminMembersState extends State<ManageAdminMembers> {
   bool isLoading = false;
+
   @override
   void initState() {
     _managerStream.setNewValues([]);

@@ -56,6 +56,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                     isLoading = false;
                   });
                 }),
+            RoundedButton(
+                title: 'Refresh',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ManageEventsScreen()));
+                }),
           ],
         ),
       ),

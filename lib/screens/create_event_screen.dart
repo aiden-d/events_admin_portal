@@ -13,17 +13,61 @@ import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
+  final Map<String, dynamic> data;
+  CreateEventScreen({this.data});
+
   @override
-  _CreateEventScreenState createState() => _CreateEventScreenState();
+  _CreateEventScreenState createState() =>
+      _CreateEventScreenState(data: this.data);
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
+  final Map<String, dynamic> data;
+  _CreateEventScreenState({this.data});
+  void initState() {
+    if (data != null) {
+      print('there is data');
+      setState(() {
+        title = data['title'];
+        summary = data['summary'];
+        info = data['info'];
+        type = data['type'];
+        price = data['price'];
+        category = data['category'];
+        link = data['link'];
+        String dateString = data['date'].toString();
+        int year = int.parse(dateString.substring(0, 4));
+        int month = int.parse(dateString.substring(4, 6));
+        int day = int.parse(dateString.substring(6, 8));
+        date = DateTime(year, month, day);
+        isDateSelected = true;
+        String startTimeString = data['start_time'].toString();
+        int startHour = int.parse(startTimeString.substring(0, 2));
+        int startMin = int.parse(startTimeString.substring(2, 4));
+        startTime = TimeOfDay(hour: startHour, minute: startMin);
+        isStartTimeSelected = true;
+        String endTimeString = data['start_time'].toString();
+        int endHour = int.parse(endTimeString.substring(0, 2));
+        int endMin = int.parse(endTimeString.substring(2, 4));
+        endTime = TimeOfDay(hour: endHour, minute: endMin);
+        isEndTimeSelected = true;
+        isMembersOnly = data['isMembersOnly'];
+        id = data['id'];
+        imageNameOnFirebase = data['image_name'];
+        isImageSelected = true;
+      });
+      print(title);
+    }
+    super.initState();
+  }
+
+  //
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
   bool isMembersOnly = false;
 
   bool isLoading = false;
-
+  String id;
   //input variables
   String title;
   String summary;
@@ -188,27 +232,49 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Briefing cannot be blank');
       return false;
     }
-
-    await uploadImage();
-    //upload to firebase
+    if (imageNameOnFirebase != null && data != null) {
+      print('image already on firebase ');
+    } else {
+      await uploadImage();
+    }
     CollectionReference eventsFB =
         FirebaseFirestore.instance.collection('Events');
-    DocumentReference ref = await eventsFB.add({});
-    await eventsFB.doc(ref.id).set({
-      'category': category,
-      'date': getDateInt(date),
-      'end_time': getTimeInt(endTime),
-      'image_name': imageNameOnFirebase,
-      'info': info,
-      'isMembersOnly': isMembersOnly,
-      'link': link,
-      'price': price,
-      'start_time': getTimeInt(startTime),
-      'summary': summary,
-      'title': title,
-      'type': type,
-      'id': ref.id,
-    });
+    //upload to firebase
+    if (data != null) {
+      await eventsFB.doc(id).set({
+        'category': category,
+        'date': getDateInt(date),
+        'end_time': getTimeInt(endTime),
+        'image_name': imageNameOnFirebase,
+        'info': info,
+        'isMembersOnly': isMembersOnly,
+        'link': link,
+        'price': price,
+        'start_time': getTimeInt(startTime),
+        'summary': summary,
+        'title': title,
+        'type': type,
+        'id': id,
+      });
+    } else {
+      DocumentReference ref = await eventsFB.add({});
+      await eventsFB.doc(ref.id).set({
+        'category': category,
+        'date': getDateInt(date),
+        'end_time': getTimeInt(endTime),
+        'image_name': imageNameOnFirebase,
+        'info': info,
+        'isMembersOnly': isMembersOnly,
+        'link': link,
+        'price': price,
+        'start_time': getTimeInt(startTime),
+        'summary': summary,
+        'title': title,
+        'type': type,
+        'id': ref.id,
+      });
+    }
+
     return true;
   }
 
@@ -239,23 +305,27 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       children: [
                         InputItem(
                             title: 'Title',
+                            textValue: title,
                             hint: 'Input event title',
                             onChanged: (value) {
                               title = value;
                             }),
                         InputItem(
+                            textValue: type,
                             title: 'Event Type',
                             hint: 'Input event type (eg: livestream)',
                             onChanged: (value) {
                               type = value;
                             }),
                         InputItem(
+                            textValue: category,
                             title: 'Category',
                             hint: 'Input event category (eg: Technology)',
                             onChanged: (value) {
                               category = value;
                             }),
                         InputItem(
+                            textValue: price.toString(),
                             isNumber: true,
                             title: 'Price in R',
                             hint: 'Price in R',
@@ -276,7 +346,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           isNoError: isImageSelected,
                           buttonText: 'Select New Image (max 150KB)',
                           title: isImageSelected == true
-                              ? 'Image Selected (${imageFile.name})'
+                              ? (imageFile != null
+                                  ? 'Image Selected (${imageFile.name})'
+                                  : 'Image Selected (${imageNameOnFirebase})')
                               : 'Image Not Selected',
                           onPressed: () async {
                             pickImage();
@@ -366,6 +438,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             color: Colors.white,
                           ),
                           child: new TextField(
+                            controller: TextEditingController(text: link),
                             onChanged: (value) {
                               link = value;
                             },
@@ -403,6 +476,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                             // here's the actual text box
                             child: new TextField(
+                              controller: TextEditingController(text: summary),
                               onChanged: (value) {
                                 summary = value;
                               },
@@ -443,6 +517,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                             // here's the actual text box
                             child: new TextField(
+                              controller: TextEditingController(text: info),
                               onChanged: (value) {
                                 info = value;
                               },
@@ -483,7 +558,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       RoundedButton(
                         isLoading: isLoading,
                         width: 50,
-                        title: 'Create Event',
+                        title: data != null ? 'Update Event' : 'Create Event',
                         onPressed: () async {
                           //TODO impiment is loading
                           setState(() {
