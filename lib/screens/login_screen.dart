@@ -77,9 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 MaterialPageRoute(builder: (context) => ChooserScreen()));
             return;
           }
-          _alertDialogBuilder('Error', 'You are not an admin');
-          FirebaseAuth.instance.signOut();
         }
+        _alertDialogBuilder('Error', 'You are not an admin');
+        FirebaseAuth.instance.signOut();
       }
     }
     setState(() {

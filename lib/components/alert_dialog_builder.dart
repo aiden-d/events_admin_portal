@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 
 class FeedbackBuilder {
   static Future<void> alertDialogBuilder(
-      String title, String info, BuildContext context) async {
+    String title,
+    String info,
+    BuildContext context, [
+    String closeButtonTitle,
+    bool isProceedButton,
+    Function proceedFunction,
+  ]) async {
     return showDialog(
         barrierDismissible: false,
         context: context,
@@ -17,7 +23,17 @@ class FeedbackBuilder {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text("Close Dialog"))
+                  child: Text(
+                      closeButtonTitle != null ? closeButtonTitle : "Close")),
+              isProceedButton
+                  ? FlatButton(
+                      onPressed: () {
+                        proceedFunction();
+                      },
+                      child: Text(closeButtonTitle != null
+                          ? closeButtonTitle
+                          : "Proceed"))
+                  : SizedBox(),
             ],
           );
         });

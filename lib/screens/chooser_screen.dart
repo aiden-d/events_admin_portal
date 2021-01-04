@@ -95,7 +95,8 @@ class _ChooserScreenState extends State<ChooserScreen> {
             child: RoundedButton(
               onPressed: () {
                 FirebaseAuth.instance.signOut();
-                return LandingPage();
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => LandingPage()));
               },
               title: 'Logout',
               textStyle: Constants.blueText,

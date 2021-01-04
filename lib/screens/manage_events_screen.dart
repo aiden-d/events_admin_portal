@@ -40,6 +40,14 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
               children: _managerStream.getNewValues(),
             ),
             RoundedButton(
+                title: 'REFRESH',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ManageEventsScreen()));
+                }),
+            RoundedButton(
                 isLoading: isLoading,
                 title: 'PUBLISH',
                 onPressed: () async {
@@ -55,14 +63,6 @@ class _ManageEventsScreenState extends State<ManageEventsScreen> {
                   setState(() {
                     isLoading = false;
                   });
-                }),
-            RoundedButton(
-                title: 'Refresh',
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ManageEventsScreen()));
                 }),
           ],
         ),

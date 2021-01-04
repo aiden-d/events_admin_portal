@@ -8,13 +8,6 @@ import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/components/item_manager.dart';
 
 final _firestore = Firestore.instance;
-final _managerStream = new ManageItemStream(
-  collectionName: 'Admin',
-  documentName: 'admin_permissions',
-  variableName: 'admin_emails',
-  isDocumentSnapshot: true,
-  hintText: 'Enter email',
-);
 
 class ManageAdminMembers extends StatefulWidget {
   @override
@@ -22,6 +15,19 @@ class ManageAdminMembers extends StatefulWidget {
 }
 
 class _ManageAdminMembersState extends State<ManageAdminMembers> {
+  ManageItemStream _managerStream = new ManageItemStream(
+    collectionName: 'Admin',
+    documentName: 'admin_permissions',
+    variableName: 'admin_emails',
+    isDocumentSnapshot: true,
+    hintText: 'Enter email',
+
+    //deleteFunction: (item){_managerStream.de},
+  );
+  void test(item) {
+    setState(() {});
+  }
+
   bool isLoading = false;
 
   @override
@@ -55,6 +61,13 @@ class _ManageAdminMembersState extends State<ManageAdminMembers> {
                   setState(() {
                     List<ManagerItem> val = _managerStream.getNewValues();
                     val.add(ManagerItem(
+                      deleteFunction: (item) {
+                        setState(() {
+                          List<ManagerItem> v = _managerStream.getNewValues();
+                          v.remove(item);
+                          _managerStream.setNewValues(v);
+                        });
+                      },
                       hintText: 'Enter email',
                       prevValue: '',
                       isFromWeb: false,

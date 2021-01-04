@@ -54,6 +54,13 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
                       hintText: 'Enter email ending',
                       prevValue: '',
                       isFromWeb: false,
+                      deleteFunction: (item) {
+                        setState(() {
+                          List<ManagerItem> v = _managerStream.getNewValues();
+                          v.remove(item);
+                          _managerStream.setNewValues(v);
+                        });
+                      },
                     ));
                     _managerStream.setNewValues(val);
                   });

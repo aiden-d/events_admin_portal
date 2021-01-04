@@ -1,4 +1,7 @@
+import 'package:amcham_admin_web/components/alert_dialog_builder.dart';
+import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/screens/create_event_screen.dart';
+import 'package:amcham_admin_web/screens/view_members_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,17 +15,20 @@ class ManageItemStream extends StatelessWidget {
   final bool isDocumentSnapshot;
   final bool isEditable;
   final String hintText;
+  final bool shouldBeTextField;
+  final Function(ManagerItem item) deleteFunction;
 
   List<ManagerItem> newValues = [];
 
-  ManageItemStream({
-    @required this.collectionName,
-    @required this.documentName,
-    @required this.variableName,
-    @required this.isDocumentSnapshot,
-    @required this.hintText,
-    this.isEditable,
-  });
+  ManageItemStream(
+      {@required this.collectionName,
+      @required this.documentName,
+      @required this.variableName,
+      @required this.isDocumentSnapshot,
+      @required this.hintText,
+      this.isEditable,
+      this.deleteFunction,
+      this.shouldBeTextField});
   final _firestore = FirebaseFirestore.instance;
   List<ManagerItem> getNewValues() {
     return newValues;
@@ -51,6 +57,8 @@ class ManageItemStream extends StatelessWidget {
 
                 for (String e in endings) {
                   items.add(ManagerItem(
+                    shouldBeTextField: shouldBeTextField,
+                    deleteFunction: deleteFunction,
                     hintText: hintText,
                     prevValue: e,
                     isFromWeb: true,
@@ -83,6 +91,8 @@ class ManageItemStream extends StatelessWidget {
                   String id = data['id'];
 
                   items.add(ManagerItem(
+                    shouldBeTextField: shouldBeTextField,
+                    deleteFunction: deleteFunction,
                     hintText: hintText,
                     prevValue: title,
                     isFromWeb: true,
@@ -178,6 +188,9 @@ class ManagerItem extends StatelessWidget {
   final String docID;
   final Map<String, dynamic> data;
   final bool isEditable;
+  final Function(ManagerItem item) deleteFunction;
+  final Function(ManagerItem item) reAddFunction;
+  final bool shouldBeTextField;
 
   ManagerItem({
     @required this.prevValue,
@@ -186,16 +199,22 @@ class ManagerItem extends StatelessWidget {
     this.docID,
     this.data,
     this.isEditable,
+    this.deleteFunction,
+    this.reAddFunction,
+    this.shouldBeTextField,
   });
   String newValue;
   bool isLoading = false;
-  bool isDeleted = false;
+
+  bool toBeDeleted = false;
+
   @override
   Widget build(BuildContext context) {
-    return isDeleted == false
-        ? Row(
-            children: [
-              RoundedTextField(
+    return Row(
+      children: [
+        shouldBeTextField == false
+            ? RoundedButton(title: prevValue, onPressed: null)
+            : RoundedTextField(
                 width: 400,
                 onChanged: (value) {
                   newValue = value;
@@ -203,25 +222,57 @@ class ManagerItem extends StatelessWidget {
                 hintText: hintText,
                 textValue: prevValue,
               ),
-              isEditable == true
-                  ? IconButton(
-                      icon: Icon(CupertinoIcons.pencil_circle),
-                      color: Colors.white,
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateEventScreen(
-                                      data: data,
-                                    )));
-                      })
-                  : SizedBox(),
-              IconButton(
-                  icon: Icon(CupertinoIcons.xmark_circle),
-                  color: Colors.red,
-                  onPressed: () {}),
-            ],
-          )
-        : SizedBox();
+        isEditable == true
+            ? IconButton(
+                icon: Icon(CupertinoIcons.pencil_circle),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CreateEventScreen(
+                                data: data,
+                              )));
+                })
+            : SizedBox(),
+        isEditable == true
+            ? IconButton(
+                icon: Icon(CupertinoIcons.person_2),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ViewMembersScreen(id: docID)));
+                })
+            : SizedBox(),
+        shouldBeTextField == false
+            ? SizedBox()
+            : IconButton(
+                icon: Icon(CupertinoIcons.xmark_circle),
+                color: toBeDeleted == true ? Colors.green : Colors.red,
+                onPressed: () {
+                  // color = Colors.blue;
+                  // (context as Element).markNeedsBuild();
+                  if (toBeDeleted != true) {
+                    (context as Element).markNeedsBuild();
+                    deleteFunction != null
+                        ? deleteFunction(this)
+                        : ManageItemStream.items.remove(this);
+                    toBeDeleted = true;
+
+                    (context as Element).markNeedsBuild();
+                  } else {
+                    (context as Element).markNeedsBuild();
+                    deleteFunction != null
+                        ? reAddFunction(this)
+                        : ManageItemStream.items.add(this);
+                    toBeDeleted = false;
+
+                    (context as Element).markNeedsBuild();
+                  }
+                })
+      ],
+    );
   }
 }
