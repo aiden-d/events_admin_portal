@@ -16,19 +16,26 @@ class ManageItemStream extends StatelessWidget {
   final bool isEditable;
   final String hintText;
   final bool shouldBeTextField;
+  final Widget onDataNull;
   final Function(ManagerItem item) deleteFunction;
+  bool isDataNull = false;
+  bool getIfDataNull() {
+    return isDataNull;
+  }
 
   List<ManagerItem> newValues = [];
 
-  ManageItemStream(
-      {@required this.collectionName,
-      @required this.documentName,
-      @required this.variableName,
-      @required this.isDocumentSnapshot,
-      @required this.hintText,
-      this.isEditable,
-      this.deleteFunction,
-      this.shouldBeTextField});
+  ManageItemStream({
+    @required this.collectionName,
+    @required this.documentName,
+    @required this.variableName,
+    @required this.isDocumentSnapshot,
+    @required this.hintText,
+    this.isEditable,
+    this.deleteFunction,
+    this.shouldBeTextField,
+    this.onDataNull,
+  });
   final _firestore = FirebaseFirestore.instance;
   List<ManagerItem> getNewValues() {
     return newValues;
@@ -53,9 +60,23 @@ class ManageItemStream extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.done) {
                 items = [];
                 Map<String, dynamic> data = snapshot.data.data();
-                List endings = data[variableName];
+                List variableData;
+                try {
+                  variableData = data[variableName];
+                } catch (e) {
+                  print(e);
+                  isDataNull = true;
+                  return onDataNull != null ? onDataNull : Text('No data');
+                }
+                print('varData = $variableData');
+                if (variableData == null) {
+                  print('null');
+                  isDataNull = true;
+                  return onDataNull != null ? onDataNull : Text('No data');
+                }
+                isDataNull = false;
 
-                for (String e in endings) {
+                for (String e in variableData) {
                   items.add(ManagerItem(
                     shouldBeTextField: shouldBeTextField,
                     deleteFunction: deleteFunction,
@@ -151,8 +172,10 @@ class ManageItemStream extends StatelessWidget {
 
       //TODO show error
     } else {
+      print(items.length);
       List<String> endingsString = [];
       for (var e in items) {
+        print('loop');
         if (e == null) {
           //TODO show error
           print('error');
@@ -160,7 +183,11 @@ class ManageItemStream extends StatelessWidget {
         }
         if (e.newValue == "") {
           await _firestore.collection(collectionName).doc(e.docID).delete();
+        } else if (await e
+            .checkToDeleteSelf(_firestore.collection(collectionName))) {
+          print('ii');
         } else {
+          print('i');
           if (e.newValue != null) {
             await _firestore
                 .collection(collectionName)
@@ -207,6 +234,15 @@ class ManagerItem extends StatelessWidget {
   bool isLoading = false;
 
   bool toBeDeleted = false;
+  Future<bool> checkToDeleteSelf(CollectionReference ref) async {
+    if (toBeDeleted == true) {
+      print('need to delete');
+      await ref.doc(docID).delete();
+      return true;
+    }
+    print('no need to delete');
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +288,7 @@ class ManagerItem extends StatelessWidget {
                 icon: Icon(CupertinoIcons.xmark_circle),
                 color: toBeDeleted == true ? Colors.green : Colors.red,
                 onPressed: () {
+                  print('to delete');
                   // color = Colors.blue;
                   // (context as Element).markNeedsBuild();
                   if (toBeDeleted != true) {

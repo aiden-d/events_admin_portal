@@ -2,6 +2,7 @@ import 'package:amcham_admin_web/components/app_bar.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:amcham_admin_web/screens/events_home_screen.dart';
+import 'package:amcham_admin_web/screens/home_page.dart';
 import 'package:amcham_admin_web/screens/landing_page.dart';
 import 'package:amcham_admin_web/screens/manage_admin_emails.dart';
 import 'package:amcham_admin_web/screens/member_email_manager.dart';
@@ -28,7 +29,7 @@ class _ChooserScreenState extends State<ChooserScreen> {
         children: [
           Center(
             child: Text(
-              'Welcome ${FirebaseAuth.instance.currentUser.email} to the Admin Portal',
+              'Welcome ${FirebaseAuth.instance.currentUser.email} to the Admin Portal.',
               //TODO change to actual name
               style: Constants.logoTitleStyle,
             ),
@@ -95,8 +96,10 @@ class _ChooserScreenState extends State<ChooserScreen> {
             child: RoundedButton(
               onPressed: () {
                 FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => LandingPage()));
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                    (route) => false);
               },
               title: 'Logout',
               textStyle: Constants.blueText,

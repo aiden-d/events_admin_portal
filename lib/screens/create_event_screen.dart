@@ -73,7 +73,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String summary;
   String info;
   String type;
-  int price;
+  int price = 0;
   String category;
   String link;
 
@@ -573,6 +573,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           if (isGood == true) {
                             _alertDialogBuilder('Finished',
                                 'Your event has been uploaded and should now appear on the app.');
+                            Navigator.pop(context);
                           }
                         },
                       ),

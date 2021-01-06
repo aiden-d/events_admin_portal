@@ -16,20 +16,25 @@ class _ViewMembersScreenState extends State<ViewMembersScreen> {
   final String id;
   final String title;
   _ViewMembersScreenState({@required this.id, @required this.title});
-  ManageItemStream _manageItemStream;
+  ManageItemStream _manageItemStream = new ManageItemStream(
+      collectionName: null,
+      documentName: null,
+      variableName: null,
+      isDocumentSnapshot: null,
+      hintText: null);
   @override
   void initState() {
-    try {
-      _manageItemStream = new ManageItemStream(
-          collectionName: 'Events',
-          documentName: id,
-          variableName: 'registered_users',
-          isDocumentSnapshot: true,
-          shouldBeTextField: false,
-          hintText: '');
-    } catch (error) {
-      print(error);
-    }
+    _manageItemStream = new ManageItemStream(
+        collectionName: 'Events',
+        documentName: id,
+        variableName: 'registered_users',
+        isDocumentSnapshot: true,
+        shouldBeTextField: false,
+        onDataNull: Text(
+          'There are no registered users for the selected event',
+          style: Constants.logoTitleStyle,
+        ),
+        hintText: '');
 
     // TODO: implement initState
     super.initState();
@@ -47,18 +52,21 @@ class _ViewMembersScreenState extends State<ViewMembersScreen> {
       body: Column(
         children: [
           _manageItemStream,
-          RoundedButton(
-              title: 'Copy As CSV',
-              onPressed: () {
-                String items = '';
-                print(ManageItemStream.items[0].prevValue);
-                for (ManagerItem i in ManageItemStream.items) {
-                  items = items + i.prevValue + ',';
-                }
-                items = items.substring(0, items.length - 1);
-                print(items);
-                FlutterClipboard.copy(items).then((value) => print('copied'));
-              })
+          _manageItemStream.getIfDataNull() != true
+              ? RoundedButton(
+                  title: 'Copy As CSV',
+                  onPressed: () {
+                    String items = '';
+                    print(ManageItemStream.items[0].prevValue);
+                    for (ManagerItem i in ManageItemStream.items) {
+                      items = items + i.prevValue + ',';
+                    }
+                    items = items.substring(0, items.length - 1);
+                    print(items);
+                    FlutterClipboard.copy(items)
+                        .then((value) => print('copied'));
+                  })
+              : Container(),
         ],
       ),
     );

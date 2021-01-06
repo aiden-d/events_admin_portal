@@ -13,6 +13,7 @@ final _managerStream = new ManageItemStream(
   variableName: 'title',
   isDocumentSnapshot: false,
   hintText: 'Enter title',
+  deleteFunction: (item) {},
 );
 
 class ManageEventsScreen extends StatefulWidget {
