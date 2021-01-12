@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:firebase/firebase.dart' as fb;
 import 'dart:html';
-
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
@@ -97,6 +97,100 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  String monthToString(int monthInt) {
+    List<String> dates = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    String month = dates[monthInt - 1];
+    return month;
+  }
+
+  List<String> seperateWords(String str) {
+    if (str == '') {
+      print('string cannot be null');
+      return [''];
+    }
+
+    String strCopy = str.trim();
+    int start = 0;
+    int i = 0;
+    int len = strCopy.length;
+    List<String> words = [];
+    while (i < len) {
+      if (strCopy[i] == ' ') {
+        words.add(strCopy.substring(start, i));
+        strCopy = strCopy.substring(i + 1, strCopy.length);
+        len = strCopy.length;
+        i = 0;
+      } else {
+        i++;
+      }
+    }
+    words.add(strCopy);
+    return words;
+  }
+
+  List<List<BigInt>> GenerateHashes() {
+    List<BigInt> tier1Hashes = [];
+    List<BigInt> tier2Hashes = [];
+    List<BigInt> tier3Hashes = [];
+    List<BigInt> tier4Hashes = [];
+//Tier 1
+    List<String> tier1words = seperateWords(title);
+    for (String s in tier1words) {
+      tier1Hashes.add(DJBHash(s));
+    }
+//Tier 2
+    List<String> tier2words = [];
+    tier2words.add(category);
+    tier2words.add(type);
+    tier2words.add(monthToString(date.month));
+    tier2words.add(date.day.toString());
+    tier2words.add(date.year.toString());
+    //TODO add speakers
+    for (String s in tier2words) {
+      tier2Hashes.add(DJBHash(s));
+    }
+    //Tier 3
+    List<String> tier3words = seperateWords(summary);
+    for (String s in tier3words) {
+      tier3Hashes.add(DJBHash(s));
+    }
+    //Tier 4
+    List<String> tier4words = seperateWords(info);
+    for (String s in tier4words) {
+      tier4Hashes.add(DJBHash(s));
+    }
+    return [tier1Hashes, tier2Hashes, tier3Hashes, tier4Hashes];
+  }
+
+  BigInt DJBHash(String str) {
+    int len = str.length;
+    BigInt _hash = BigInt.from(5381);
+    int i = 0;
+
+    List<int> list = utf8.encode(str.toLowerCase());
+    print('encoded = $list');
+    for (int i in list) {
+      print(i);
+      _hash = ((_hash << 5) + _hash) + BigInt.from(i);
+      print('_hash = $_hash');
+    }
+    print('hash in func = $_hash');
+    return _hash;
+  }
+
   void pickImage() async {
     InputElement uploadInput = FileUploadInputElement()..accept = 'image/*';
     uploadInput.click();
@@ -180,6 +274,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return timeInt;
   }
 
+  List<double> getDoublesFromBigInt(List<BigInt> bigInts) {
+    List<double> returnList = [];
+    for (BigInt bigInt in bigInts) {
+      double value = double.parse(bigInt.toString());
+      returnList.add(value);
+    }
+    return returnList;
+  }
+
   Future<bool> validateAndUpload() async {
     if (isImageSelected == true &&
         isDateSelected == true &&
@@ -239,39 +342,65 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
     CollectionReference eventsFB =
         FirebaseFirestore.instance.collection('Events');
+
+    int dateInt = getDateInt(date);
+    int endTimeInt = getTimeInt(endTime);
+    int startTimeInt = getTimeInt(startTime);
+
+    List<List<BigInt>> hashes = GenerateHashes();
     //upload to firebase
     if (data != null) {
+      var doc = await eventsFB.doc(id).get();
+      List<String> rUsers = [];
+      try {
+        if (doc['registered_users'] != null) {
+          rUsers = doc['registered_users'];
+        }
+      } catch (e) {
+        print(e);
+      }
+
       await eventsFB.doc(id).set({
         'category': category,
-        'date': getDateInt(date),
-        'end_time': getTimeInt(endTime),
+        'date': dateInt,
+        'end_time': endTimeInt,
         'image_name': imageNameOnFirebase,
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
         'price': price,
-        'start_time': getTimeInt(startTime),
+        'start_time': startTimeInt,
         'summary': summary,
         'title': title,
         'type': type,
         'id': id,
+        'registered_users': rUsers,
+        //todo FIX
+        'tier_1_hashes': getDoublesFromBigInt(hashes[0]),
+        'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
+        'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
+        'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
       });
     } else {
       DocumentReference ref = await eventsFB.add({});
       await eventsFB.doc(ref.id).set({
         'category': category,
-        'date': getDateInt(date),
-        'end_time': getTimeInt(endTime),
+        'date': dateInt,
+        'end_time': endTimeInt,
         'image_name': imageNameOnFirebase,
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
         'price': price,
-        'start_time': getTimeInt(startTime),
+        'start_time': startTimeInt,
         'summary': summary,
         'title': title,
         'type': type,
         'id': ref.id,
+        'tier_1_hashes': getDoublesFromBigInt(hashes[0]),
+        'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
+        'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
+        'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
       });
     }
 
