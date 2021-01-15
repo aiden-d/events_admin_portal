@@ -1,7 +1,9 @@
 import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
+import 'package:amcham_admin_web/components/rounded_text_field.dart';
 
 import 'package:amcham_admin_web/components/select_item.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:firebase/firebase.dart' as fb;
@@ -24,6 +26,7 @@ class CreateEventScreen extends StatefulWidget {
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final Map<String, dynamic> data;
   _CreateEventScreenState({this.data});
+  ItemListMaker itemListMaker = new ItemListMaker();
   void initState() {
     if (data != null) {
       print('there is data');
@@ -55,9 +58,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         id = data['id'];
         imageNameOnFirebase = data['image_name'];
         isImageSelected = true;
+        speakers = data['speakers'];
       });
       print(title);
     }
+    itemListMaker = new ItemListMaker(
+      passedItemsNames: speakers,
+    );
+    itemListMaker.generateItems();
     super.initState();
   }
 
@@ -72,10 +80,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String title;
   String summary;
   String info;
-  String type;
+  String type = 'Livestream';
   int price = 0;
-  String category;
+  String category = 'General';
   String link;
+  List speakers;
 
   //validation
   bool isImageSelected = false;
@@ -301,15 +310,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return false;
     }
 
-    if (type == null) {
-      _alertDialogBuilder('Error', 'Event Type cannot be blank');
-      return false;
-    } else if (type.characters.length > maxComponentChar) {
-      _alertDialogBuilder(
-          'Error', 'Event Type is too long (max $maxComponentChar characters)');
-      return false;
-    }
-
     if (category == null) {
       _alertDialogBuilder('Error', 'Category cannot be blank');
       return false;
@@ -380,6 +380,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
         'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
         'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
+        'speakers': itemListMaker.getAsListString(),
       });
     } else {
       DocumentReference ref = await eventsFB.add({});
@@ -401,6 +402,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
         'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
         'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
+        'speakers': itemListMaker.getAsListString(),
       });
     }
 
@@ -439,25 +441,109 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             onChanged: (value) {
                               title = value;
                             }),
-                        InputItem(
-                            textValue: type,
-                            title: 'Event Type',
-                            hint: 'Input event type (eg: livestream)',
-                            onChanged: (value) {
-                              type = value;
-                            }),
-                        InputItem(
-                            textValue: category,
-                            title: 'Category',
-                            hint: 'Input event category (eg: Technology)',
-                            onChanged: (value) {
-                              category = value;
-                            }),
+                        Column(
+                          children: [
+                            Text(
+                              'Event Type',
+                              style: Constants.logoTitleStyle,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.white,
+                              ),
+                              child: DropdownButton<String>(
+                                value: type,
+                                icon: Icon(Icons.arrow_downward),
+                                iconSize: 24,
+                                elevation: 16,
+                                style: TextStyle(color: Colors.black),
+                                underline: Container(
+                                  height: 2,
+                                  color: Colors.black,
+                                ),
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    type = newValue;
+                                  });
+                                },
+                                items: <String>[
+                                  'Livestream',
+                                  'Virtual Conference',
+                                  'Physical Event',
+                                  'MS Teams',
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              'Category',
+                              style: Constants.logoTitleStyle,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.white,
+                              ),
+                              child: DropdownButton<String>(
+                                value: category,
+                                icon: Icon(Icons.arrow_downward),
+                                iconSize: 24,
+                                elevation: 16,
+                                style: TextStyle(color: Colors.black),
+                                underline: Container(
+                                  height: 2,
+                                  color: Colors.black,
+                                ),
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    category = newValue;
+                                  });
+                                },
+                                items: <String>[
+                                  'General',
+                                  'BAC Forum',
+                                  'Digital Forum',
+                                  'Energy Forum',
+                                  'Health Forum',
+                                  'People Mgt Forum',
+                                  'Policy & Gvt Forum',
+                                  'Regional Trade Forum',
+                                  'Tax Forum',
+                                  'Transformation Forum',
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
                         InputItem(
                             textValue: price.toString(),
                             isNumber: true,
-                            title: 'Price in R',
-                            hint: 'Price in R',
+                            title: 'Price in ZAR',
+                            hint: 'Price in ZAR',
                             onChanged: (value) {
                               price = int.parse(value);
                             }),
@@ -548,6 +634,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       ],
                     ),
                   ),
+                  itemListMaker,
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 20),
@@ -715,5 +802,122 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         ),
       ),
     );
+  }
+}
+
+class ItemListMaker extends StatelessWidget {
+  ItemListMaker({this.passedItemsNames});
+  final List passedItemsNames;
+  List<Item> items = [];
+  bool removeItem(Item item) {
+    bool b = items.remove(item);
+    return b;
+  }
+
+  void generateItems() {
+    print('passed item ${passedItemsNames.toString()}');
+    if (passedItemsNames == null || passedItemsNames == []) {
+      items.add(Item(
+        listMaker: this,
+        title: '',
+      ));
+    } else {
+      for (String str in passedItemsNames) {
+        items.add(Item(
+          title: str,
+          listMaker: this,
+        ));
+      }
+    }
+  }
+
+  void checkIfNone() {
+    if (items == null) {
+      items.add(Item(
+        listMaker: this,
+        title: '',
+      ));
+    }
+  }
+
+  List<String> getAsListString() {
+    List<String> list = [];
+    for (Item i in items) {
+      if (i.title != null && i.title != '') {
+        list.add(i.title);
+      }
+    }
+    print('list = ${list.toString()}');
+    return list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Speakers',
+          style: Constants.logoTitleStyle,
+        ),
+        Column(
+          children: items,
+        ),
+        RoundedButton(
+            title: 'Add New',
+            onPressed: () {
+              items.add(Item(
+                title: '',
+                listMaker: this,
+              ));
+              (context as Element).markNeedsBuild();
+            }),
+      ],
+    );
+  }
+}
+
+class Item extends StatelessWidget {
+  String title;
+  bool isDeleted = false;
+  final ItemListMaker listMaker;
+  Item({this.title, this.listMaker});
+
+  @override
+  Widget build(BuildContext context) {
+    return isDeleted == false
+        ? Center(
+            child: Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RoundedTextField(
+                    hintText: 'Enter a name...',
+                    textValue: title,
+                    onChanged: (val) {
+                      title = val;
+                    },
+                  ),
+                  IconButton(
+                      icon: Icon(
+                        CupertinoIcons.xmark_octagon,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        print('pressed');
+                        print(this.toString());
+                        if (listMaker.items.length <= 1) {
+                          title = '';
+                        } else {
+                          listMaker.items.remove(this);
+                          isDeleted = true;
+                        }
+
+                        (context as Element).markNeedsBuild();
+                      }),
+                ],
+              ),
+            ),
+          )
+        : SizedBox();
   }
 }
