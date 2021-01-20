@@ -190,13 +190,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     int i = 0;
 
     List<int> list = utf8.encode(str.toLowerCase());
-    print('encoded = $list');
+
     for (int i in list) {
       print(i);
       _hash = ((_hash << 5) + _hash) + BigInt.from(i);
-      print('_hash = $_hash');
     }
-    print('hash in func = $_hash');
+
+    //delete
+    if (str == 'Livestream') {
+      print('livestream =  $_hash');
+    }
     return _hash;
   }
 
@@ -285,6 +288,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   List<double> getDoublesFromBigInt(List<BigInt> bigInts) {
     List<double> returnList = [];
+
     for (BigInt bigInt in bigInts) {
       double value = double.parse(bigInt.toString());
       returnList.add(value);
