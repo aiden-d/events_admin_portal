@@ -159,7 +159,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 //Tier 1
     List<String> tier1words = seperateWords(title);
     for (String s in tier1words) {
-      tier1Hashes.add(s.toLowerCase().hashCode);
+      tier1Hashes.add(generateSimpleHash(s.toLowerCase()));
     }
 //Tier 2
     List<String> tier2words = [];
@@ -171,26 +171,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     //TODO add speakers
     for (String s in tier2words) {
       if (s == 'Livestream') {
-        print('livestream ==== ${s.toLowerCase().hashCode}');
+        print('livestream ==== ${generateSimpleHash(s.toLowerCase())}');
       }
-      tier2Hashes.add(s.toLowerCase().hashCode);
+      tier2Hashes.add(generateSimpleHash(s.toLowerCase()));
       //TODO delete below
 
     }
     //Tier 3
     List<String> tier3words = seperateWords(summary);
     for (String s in tier3words) {
-      tier3Hashes.add(s.toLowerCase().hashCode);
+      tier3Hashes.add(generateSimpleHash(s.toLowerCase()));
     }
     //Tier 4
     List<String> tier4words = seperateWords(info);
     for (String s in tier4words) {
-      tier4Hashes.add(s.toLowerCase().hashCode);
+      tier4Hashes.add(generateSimpleHash(s.toLowerCase()));
     }
     return [tier1Hashes, tier2Hashes, tier3Hashes, tier4Hashes];
   }
 
-  double generateSimpleHash(String str) {
+  int generateSimpleHash(String str) {
     int length = str.length;
     int i = 0;
     String s = '';
@@ -198,7 +198,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       s = s + getPlaceInAlphabet(str[i]).toString() + '0';
       i++;
     }
-    return double.parse(s);
+    if (s.length < 18) {
+      s = s.substring(0, s.length);
+    } else {
+      s = s.substring(0, 18);
+    }
+
+    return int.parse(s);
   }
 
   int getPlaceInAlphabet(String str) {
