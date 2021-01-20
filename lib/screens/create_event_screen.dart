@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 
 class CreateEventScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -150,15 +151,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return words;
   }
 
-  List<List<BigInt>> GenerateHashes() {
-    List<BigInt> tier1Hashes = [];
-    List<BigInt> tier2Hashes = [];
-    List<BigInt> tier3Hashes = [];
-    List<BigInt> tier4Hashes = [];
+  List<List<int>> GenerateHashes() {
+    List<int> tier1Hashes = [];
+    List<int> tier2Hashes = [];
+    List<int> tier3Hashes = [];
+    List<int> tier4Hashes = [];
 //Tier 1
     List<String> tier1words = seperateWords(title);
     for (String s in tier1words) {
-      tier1Hashes.add(DJBHash(s));
+      tier1Hashes.add(s.toLowerCase().hashCode);
     }
 //Tier 2
     List<String> tier2words = [];
@@ -169,38 +170,144 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     tier2words.add(date.year.toString());
     //TODO add speakers
     for (String s in tier2words) {
-      tier2Hashes.add(DJBHash(s));
+      if (s == 'Livestream') {
+        print('livestream ==== ${s.toLowerCase().hashCode}');
+      }
+      tier2Hashes.add(s.toLowerCase().hashCode);
+      //TODO delete below
+
     }
     //Tier 3
     List<String> tier3words = seperateWords(summary);
     for (String s in tier3words) {
-      tier3Hashes.add(DJBHash(s));
+      tier3Hashes.add(s.toLowerCase().hashCode);
     }
     //Tier 4
     List<String> tier4words = seperateWords(info);
     for (String s in tier4words) {
-      tier4Hashes.add(DJBHash(s));
+      tier4Hashes.add(s.toLowerCase().hashCode);
     }
     return [tier1Hashes, tier2Hashes, tier3Hashes, tier4Hashes];
   }
 
-  BigInt DJBHash(String str) {
-    int len = str.length;
-    BigInt _hash = BigInt.from(5381);
+  double generateSimpleHash(String str) {
+    int length = str.length;
     int i = 0;
-
-    List<int> list = utf8.encode(str.toLowerCase());
-
-    for (int i in list) {
-      print(i);
-      _hash = ((_hash << 5) + _hash) + BigInt.from(i);
+    String s = '';
+    while (i < length) {
+      s = s + getPlaceInAlphabet(str[i]).toString() + '0';
+      i++;
     }
+    return double.parse(s);
+  }
 
-    //delete
-    if (str == 'Livestream') {
-      print('livestream =  $_hash');
+  int getPlaceInAlphabet(String str) {
+    if (str == 'a') {
+      return 1;
     }
-    return _hash;
+    if (str == 'b') {
+      return 2;
+    }
+    if (str == 'c') {
+      return 3;
+    }
+    if (str == 'd') {
+      return 4;
+    }
+    if (str == 'e') {
+      return 5;
+    }
+    if (str == 'f') {
+      return 6;
+    }
+    if (str == 'g') {
+      return 7;
+    }
+    if (str == 'h') {
+      return 8;
+    }
+    if (str == 'i') {
+      return 9;
+    }
+    if (str == 'j') {
+      return 10;
+    }
+    if (str == 'k') {
+      return 11;
+    }
+    if (str == 'l') {
+      return 12;
+    }
+    if (str == 'm') {
+      return 13;
+    }
+    if (str == 'n') {
+      return 14;
+    }
+    if (str == 'o') {
+      return 15;
+    }
+    if (str == 'p') {
+      return 16;
+    }
+    if (str == 'q') {
+      return 17;
+    }
+    if (str == 'r') {
+      return 18;
+    }
+    if (str == 's') {
+      return 19;
+    }
+    if (str == 't') {
+      return 20;
+    }
+    if (str == 'u') {
+      return 21;
+    }
+    if (str == 'v') {
+      return 22;
+    }
+    if (str == 'w') {
+      return 23;
+    }
+    if (str == 'x') {
+      return 24;
+    }
+    if (str == 'y') {
+      return 25;
+    }
+    if (str == 'z') {
+      return 26;
+    }
+    if (str == '1') {
+      return 27;
+    }
+    if (str == '2') {
+      return 28;
+    }
+    if (str == '3') {
+      return 29;
+    }
+    if (str == '4') {
+      return 30;
+    }
+    if (str == '5') {
+      return 31;
+    }
+    if (str == '6') {
+      return 32;
+    }
+    if (str == '7') {
+      return 33;
+    }
+    if (str == '8') {
+      return 34;
+    }
+    if (str == '9') {
+      return 35;
+    }
+    return 36;
   }
 
   void pickImage() async {
@@ -286,16 +393,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return timeInt;
   }
 
-  List<double> getDoublesFromBigInt(List<BigInt> bigInts) {
-    List<double> returnList = [];
-
-    for (BigInt bigInt in bigInts) {
-      double value = double.parse(bigInt.toString());
-      returnList.add(value);
-    }
-    return returnList;
-  }
-
   Future<bool> validateAndUpload() async {
     if (isImageSelected == true &&
         isDateSelected == true &&
@@ -351,7 +448,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     int endTimeInt = getTimeInt(endTime);
     int startTimeInt = getTimeInt(startTime);
 
-    List<List<BigInt>> hashes = GenerateHashes();
+    List<List<int>> hashes = GenerateHashes();
     //upload to firebase
     if (data != null) {
       var doc = await eventsFB.doc(id).get();
@@ -380,10 +477,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'id': id,
         'registered_users': rUsers,
         //todo FIX
-        'tier_1_hashes': getDoublesFromBigInt(hashes[0]),
-        'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
-        'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
-        'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
+        'tier_1_hashes': hashes[0],
+        'tier_2_hashes': hashes[1],
+        'tier_3_hashes': hashes[2],
+        'tier_4_hashes': hashes[3],
         'speakers': itemListMaker.getAsListString(),
       });
     } else {
@@ -402,10 +499,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'title': title,
         'type': type,
         'id': ref.id,
-        'tier_1_hashes': getDoublesFromBigInt(hashes[0]),
-        'tier_2_hashes': getDoublesFromBigInt(hashes[1]),
-        'tier_3_hashes': getDoublesFromBigInt(hashes[2]),
-        'tier_4_hashes': getDoublesFromBigInt(hashes[3]),
+        'tier_1_hashes': hashes[0],
+        'tier_2_hashes': hashes[1],
+        'tier_3_hashes': hashes[2],
+        'tier_4_hashes': hashes[3],
         'speakers': itemListMaker.getAsListString(),
       });
     }
