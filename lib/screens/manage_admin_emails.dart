@@ -1,4 +1,3 @@
-import 'dart:js';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
