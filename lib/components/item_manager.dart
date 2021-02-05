@@ -1,6 +1,7 @@
 import 'package:amcham_admin_web/components/alert_dialog_builder.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/screens/create_event_screen.dart';
+import 'package:amcham_admin_web/screens/create_news_screen.dart';
 import 'package:amcham_admin_web/screens/view_members_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class ManageItemStream extends StatelessWidget {
   final String hintText;
   final bool shouldBeTextField;
   final Widget onDataNull;
+  final bool isNews;
   final Function(ManagerItem item) deleteFunction;
   bool isDataNull = false;
   bool getIfDataNull() {
@@ -35,6 +37,7 @@ class ManageItemStream extends StatelessWidget {
     this.deleteFunction,
     this.shouldBeTextField,
     this.onDataNull,
+    this.isNews,
   });
   final _firestore = FirebaseFirestore.instance;
   List<ManagerItem> getNewValues() {
@@ -83,6 +86,7 @@ class ManageItemStream extends StatelessWidget {
                     hintText: hintText,
                     prevValue: e,
                     isFromWeb: true,
+                    isNews: isNews,
                   ));
                 }
                 return Center(
@@ -120,6 +124,7 @@ class ManageItemStream extends StatelessWidget {
                     docID: doc.id,
                     data: data,
                     isEditable: true,
+                    isNews: isNews,
                   ));
                 }
                 return Center(
@@ -218,11 +223,13 @@ class ManagerItem extends StatelessWidget {
   final Function(ManagerItem item) deleteFunction;
   final Function(ManagerItem item) reAddFunction;
   final bool shouldBeTextField;
+  final bool isNews;
 
   ManagerItem({
     @required this.prevValue,
     @required this.isFromWeb,
     @required this.hintText,
+    @required this.isNews,
     this.docID,
     this.data,
     this.isEditable,
@@ -263,12 +270,24 @@ class ManagerItem extends StatelessWidget {
                 icon: Icon(CupertinoIcons.pencil_circle),
                 color: Colors.white,
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreateEventScreen(
-                                data: data,
-                              )));
+                  if (isNews == true) {
+                    print('news is true!');
+                  } else {
+                    print('news isnt true');
+                  }
+                  isNews == true
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateNewsScreen(
+                                    data: data,
+                                  )))
+                      : Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateEventScreen(
+                                    data: data,
+                                  )));
                 })
             : SizedBox(),
         isEditable == true

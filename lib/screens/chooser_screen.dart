@@ -6,6 +6,7 @@ import 'package:amcham_admin_web/screens/home_page.dart';
 import 'package:amcham_admin_web/screens/landing_page.dart';
 import 'package:amcham_admin_web/screens/manage_admin_emails.dart';
 import 'package:amcham_admin_web/screens/member_email_manager.dart';
+import 'package:amcham_admin_web/screens/news_home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +55,10 @@ class _ChooserScreenState extends State<ChooserScreen> {
           ),
           Center(
             child: RoundedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => NewsHomeScreen()));
+              },
               title: 'News',
               textStyle: Constants.blueText,
               width: 150,
