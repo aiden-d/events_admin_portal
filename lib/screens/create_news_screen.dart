@@ -33,6 +33,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
       print('there is data');
       setState(() {
         title = data['title'];
+        link = data['link'];
         summary_text = data['summary_text'];
         info = data['info'];
         String dateString = data['date_time'].toString();
@@ -54,6 +55,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   //input variables
   String title;
   String summary_text;
+  String link = '';
   String info;
   int dateTimeInt;
   //validation
@@ -405,6 +407,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         'date_time': dateTimeInt,
         'image_name': imageNameOnFirebase,
         'info': info,
+        'link': link,
 
         'summary_text': summary_text,
         'title': title,
@@ -428,6 +431,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         'tier_1_hashes': hashes[0],
         'tier_2_hashes': hashes[1],
         'tier_3_hashes': hashes[2],
+        'link': link,
       });
     }
 
@@ -566,6 +570,44 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
 
                               decoration: new InputDecoration.collapsed(
                                 hintText: 'Please enter a lot of text',
+                              ),
+                            ),
+                            // ends the actual text box
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 20),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Link/URL',
+                          style: Constants.logoTitleStyle,
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                          ),
+                          child: new SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            reverse: true,
+
+                            // here's the actual text box
+                            child: new TextField(
+                              controller: TextEditingController(text: link),
+                              onChanged: (value) {
+                                link = value;
+                              },
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null, //grow automatically
+
+                              decoration: new InputDecoration.collapsed(
+                                hintText: 'Please enter the link',
                               ),
                             ),
                             // ends the actual text box
