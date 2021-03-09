@@ -6,6 +6,7 @@ import 'login_screen.dart';
 
 import 'package:amcham_admin_web/components/amcham_logo.dart';
 import 'package:amcham_admin_web/size_config.dart';
+import 'package:package_info/package_info.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,6 +14,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  PackageInfo packageInfo;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<String> getPackageString() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
