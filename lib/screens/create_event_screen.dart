@@ -39,6 +39,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         price = data['price'];
         category = data['category'];
         link = data['link'];
+        pastLink = data['past_link'];
         String dateString = data['date'].toString();
         int year = int.parse(dateString.substring(0, 4));
         int month = int.parse(dateString.substring(4, 6));
@@ -85,6 +86,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   int price = 0;
   String category = 'General';
   String link;
+  String pastLink = '';
   List speakers;
 
   //validation
@@ -437,10 +439,24 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Link cannot be blank');
       return false;
     }
+    if (link.substring(0, 8) != 'https://' &&
+        link.substring(0, 7) != 'http://') {
+      _alertDialogBuilder('Error', 'Link must contain https:// or http://');
+      return false;
+    }
     if (summary == null) {
       _alertDialogBuilder('Error', 'Summary cannot be blank');
       return false;
     }
+    if (pastLink != null && pastLink != '') {
+      if (pastLink.substring(0, 8) != 'https://' &&
+          pastLink.substring(0, 7) != 'http://') {
+        _alertDialogBuilder(
+            'Error', 'Past Link must contain https:// or http://');
+        return false;
+      }
+    }
+
     if (info == null) {
       _alertDialogBuilder('Error', 'Briefing cannot be blank');
       return false;
@@ -480,6 +496,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
+        'past_link': pastLink,
         'price': price,
         'start_time': startTimeInt,
         'summary': summary,
@@ -504,6 +521,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
+        'past_link': pastLink,
         'price': price,
         'start_time': startTimeInt,
         'summary': summary,
@@ -692,7 +710,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                 context: context,
                                 initialDate:
                                     date != null ? date : DateTime.now(),
-                                firstDate: DateTime.now(),
+                                firstDate: DateTime(1999),
                                 lastDate: DateTime(2999));
                             setState(() {
                               date = tempDate;
@@ -774,6 +792,39 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
                             decoration: new InputDecoration.collapsed(
                               hintText: 'Link to event',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 20),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Link to past event (blank for future)',
+                          style: Constants.logoTitleStyle,
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                          ),
+                          child: new TextField(
+                            controller: TextEditingController(text: pastLink),
+                            onChanged: (value) {
+                              pastLink = value;
+                            },
+                            //grow automatically
+
+                            decoration: new InputDecoration.collapsed(
+                              hintText: 'Link to past event',
                             ),
                           ),
                         ),
