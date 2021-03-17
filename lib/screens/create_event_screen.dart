@@ -380,14 +380,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         });
   }
 
-  int getDateInt(DateTime _date) {
-    int dateInt;
-    String dateString;
-    dateString =
-        '${_date.year}${_date.month < 10 ? '0' + _date.month.toString() : _date.month}${_date.day < 10 ? '0' + _date.day.toString() : _date.day}';
-    dateInt = int.parse(dateString);
-    return dateInt;
-    //TODO
+  int getDateTimeInt() {
+    int val = int.parse(date.year.toString() +
+        (date.month > 9 ? date.month.toString() : '0' + date.month.toString()) +
+        (date.day > 9 ? date.day.toString() : '0' + date.day.toString()) +
+        (endTime.hour > 9
+            ? endTime.hour.toString()
+            : '0' + endTime.hour.toString()) +
+        (endTime.minute > 9
+            ? endTime.minute.toString()
+            : '0' + endTime.minute.toString()));
+    return val;
   }
 
   int getTimeInt(TimeOfDay _time) {
@@ -450,7 +453,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     CollectionReference eventsFB =
         FirebaseFirestore.instance.collection('Events');
 
-    int dateInt = getDateInt(date);
+    int dateInt = getDateTimeInt();
     int endTimeInt = getTimeInt(endTime);
     int startTimeInt = getTimeInt(startTime);
 
