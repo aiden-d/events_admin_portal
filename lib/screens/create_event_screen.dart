@@ -46,12 +46,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         int day = int.parse(dateString.substring(6, 8));
         date = DateTime(year, month, day);
         isDateSelected = true;
-        String startTimeString = data['start_time'].toString();
+        String startTimeString = data['start_time'].toString().length >= 4
+            ? data['start_time'].toString()
+            : '0' + data['start_time'].toString();
         int startHour = int.parse(startTimeString.substring(0, 2));
         int startMin = int.parse(startTimeString.substring(2, 4));
         startTime = TimeOfDay(hour: startHour, minute: startMin);
         isStartTimeSelected = true;
-        String endTimeString = data['start_time'].toString();
+        String endTimeString = data['end_time'].toString().length >= 4
+            ? data['end_time'].toString()
+            : '0' + data['end_time'].toString();
         int endHour = int.parse(endTimeString.substring(0, 2));
         int endMin = int.parse(endTimeString.substring(2, 4));
         endTime = TimeOfDay(hour: endHour, minute: endMin);
@@ -97,7 +101,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   //TODO
 
   //
-  int maxTitleChar = 25;
+  int maxTitleChar = 30;
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
@@ -425,12 +429,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (category == null) {
       _alertDialogBuilder('Error', 'Category cannot be blank');
       return false;
-    } else if (category.characters.length > maxComponentChar) {
-      _alertDialogBuilder(
-          'Error', 'Category is too long (max $maxComponentChar characters)');
-      return false;
     }
-
     if (price == null) {
       _alertDialogBuilder('Error', 'Price cannot be blank');
       return false;

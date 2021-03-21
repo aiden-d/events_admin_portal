@@ -75,6 +75,7 @@ class _HomePageState extends State<HomePage> {
                     height: 30,
                   ),
                   ForgotPassword(),
+                  Text('Version: 6'),
                 ],
               ),
             ),

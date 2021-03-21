@@ -64,7 +64,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   //TODO
 
   //
-  int maxTitleChar = 25;
+  int maxTitleChar = 32;
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
