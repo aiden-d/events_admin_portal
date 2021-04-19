@@ -13,6 +13,7 @@ final _managerStream = new ManageItemStream(
   variableName: 'title',
   isDocumentSnapshot: false,
   hintText: 'Enter title',
+  orderVar: "date",
   deleteFunction: (item) {},
 );
 

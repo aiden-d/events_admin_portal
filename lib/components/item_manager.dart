@@ -20,6 +20,7 @@ class ManageItemStream extends StatelessWidget {
   final Widget onDataNull;
   final bool isNews;
   final Function(ManagerItem item) deleteFunction;
+  final String orderVar;
   bool isDataNull = false;
   bool getIfDataNull() {
     return isDataNull;
@@ -33,6 +34,7 @@ class ManageItemStream extends StatelessWidget {
     @required this.variableName,
     @required this.isDocumentSnapshot,
     @required this.hintText,
+    this.orderVar,
     this.isEditable,
     this.deleteFunction,
     this.shouldBeTextField,
@@ -101,7 +103,7 @@ class ManageItemStream extends StatelessWidget {
             },
           )
         : FutureBuilder<QuerySnapshot>(
-            future: _firestore.collection(collectionName).get(),
+            future: orderVar != null ? _firestore.collection(collectionName).orderBy(orderVar, descending: true).get() : _firestore.collection(collectionName).get(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
                 print(snapshot.error.toString() + collectionName);

@@ -3,6 +3,7 @@ import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 
 import 'package:amcham_admin_web/components/select_item.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
@@ -14,6 +15,8 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+
+import '../components/rounded_button.dart';
 
 class CreateNewsScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -495,6 +498,10 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                       ],
                     ),
                   ),
+                  RoundedButton(title: "Copy Bullet Point •", onPressed: (){
+                    FlutterClipboard.copy('• ');
+
+                  }),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 20),
@@ -584,7 +591,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'Link/URL',
+                          'Link/URL (Optional)',
                           style: Constants.logoTitleStyle,
                         ),
                         Container(
@@ -634,8 +641,8 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                         isLoading = false;
                       });
 
-                      if (isGood == true) {
-                        _alertDialogBuilder('Finished',
+                      if (isGood != false) {
+                        await _alertDialogBuilder('Finished',
                             'The News has been uploaded and should now appear on the app.');
                         Navigator.pop(context);
                       }

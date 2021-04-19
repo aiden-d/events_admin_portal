@@ -2,6 +2,7 @@ import 'package:amcham_admin_web/components/forgot_password.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
+import '../constants.dart';
 import 'login_screen.dart';
 
 import 'package:amcham_admin_web/components/amcham_logo.dart';
@@ -75,7 +76,8 @@ class _HomePageState extends State<HomePage> {
                     height: 30,
                   ),
                   ForgotPassword(),
-                  Text('Version: 6'),
+                  SizedBox(height: 20,),
+                  Text('Version: 11', style: TextStyle(color: Colors.white),),
                 ],
               ),
             ),

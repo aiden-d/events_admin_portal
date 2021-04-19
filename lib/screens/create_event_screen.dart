@@ -534,6 +534,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'speakers': itemListMaker.getAsListString(),
       });
     }
+    print("all good");
 
     return true;
   }
@@ -948,8 +949,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             isLoading = false;
                           });
 
-                          if (isGood == true) {
-                            _alertDialogBuilder('Finished',
+                          if (isGood != false) {
+                            print("all good statement");
+                            await _alertDialogBuilder('Finished',
                                 'Your event has been uploaded and should now appear on the app.');
                             Navigator.pop(context);
                           }

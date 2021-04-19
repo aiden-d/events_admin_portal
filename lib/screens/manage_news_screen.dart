@@ -15,6 +15,7 @@ final _managerStream = new ManageItemStream(
   hintText: 'Enter title',
   deleteFunction: (item) {},
   isNews: true,
+  orderVar: "date_time",
 );
 
 class ManageNewsScreen extends StatefulWidget {
