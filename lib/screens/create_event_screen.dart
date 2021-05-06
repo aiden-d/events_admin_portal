@@ -3,6 +3,7 @@ import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 
 import 'package:amcham_admin_web/components/select_item.dart';
+import 'package:amcham_admin_web/screens/preview_event_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
@@ -14,6 +15,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:amcham_admin_web/components/event_item.dart';
 
 class CreateEventScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -957,6 +959,42 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           }
                         },
                       ),
+                      RoundedButton(
+                        title: "Preview",
+                        onPressed: () async {
+                          var data = await firestore
+                              .collection('Events')
+                              .doc(id)
+                              .get();
+                          EventItem item = new EventItem(
+                            pastLink: data['past_link'],
+                            price: data['price'],
+                            date: data['date'],
+                            title: data['title'],
+                            type: data['type'],
+                            category: data['category'],
+                            isMembersOnly: data['isMembersOnly'],
+                            summary: data['summary'],
+                            imageRef: data['image_name'],
+                            info: data['info'],
+                            id: id,
+                            link: data['link'],
+                            registeredUsers: data['registered_users'],
+                            endTime: data['end_time'],
+                            startTime: data['start_time'],
+                            tier1hashes: data['tier_1_hashes'],
+                            tier2hashes: data['tier_2_hashes'],
+                            tier3hashes: data['tier_3_hashes'],
+                            tier4hashes: data['tier_4_hashes'],
+                            speakers: data['speakers'],
+                          );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SingleEventScreen(item: item)));
+                        },
+                      )
                     ],
                   ),
                 ],
