@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:amcham_admin_web/constants.dart';
+import 'package:image_whisperer/image_whisperer.dart';
 import 'get_firebase_image.dart';
 
 class EventItem extends StatelessWidget {
@@ -20,12 +21,8 @@ class EventItem extends StatelessWidget {
   final String id;
   final String link;
   final String pastLink;
-  final List<dynamic> registeredUsers;
-  final List tier1hashes;
-  final List tier2hashes;
-  final List tier3hashes;
-  final List tier4hashes;
   final List speakers;
+  final BlobImage blobImage;
   bool isButton;
   bool showInfo;
   bool hideSummary;
@@ -45,47 +42,13 @@ class EventItem extends StatelessWidget {
     @required this.info,
     @required this.id,
     @required this.link,
-    @required this.registeredUsers,
     @required this.startTime,
     @required this.endTime,
-    @required this.tier1hashes,
-    @required this.tier2hashes,
-    @required this.tier3hashes,
-    @required this.tier4hashes,
     @required this.speakers,
     @required this.pastLink,
+    @required this.blobImage,
   });
   int rankedPoints;
-  int getPointsFromHashes(List<int> searchHashes) {
-    int points = 0;
-    for (int searchHash in searchHashes) {
-      for (var hash in tier1hashes) {
-        if (hash == searchHash) {
-          points += 100;
-        }
-      }
-      for (var hash in tier2hashes) {
-        if (hash == searchHash) {
-          points += 75;
-        }
-      }
-      for (var hash in tier3hashes) {
-        if (hash == searchHash) {
-          points += 30;
-        }
-      }
-      // for (int hash in tier4hashes) {
-      //   if (hash == searchHash) {
-      //     points += 15;
-      //   }
-      // }
-      //Commented out to increase performance and battery
-
-    }
-    print('points = $points');
-    rankedPoints = points;
-    return points;
-  }
 
   //date must be formated as year/month/day
   String DateToString(int numberDate) {
@@ -126,10 +89,7 @@ class EventItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
-      onPressed: isButton == false
-          ? null
-          : () {
-            },
+      onPressed: isButton == false ? null : () {},
       padding: EdgeInsets.symmetric(vertical: 10),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -152,7 +112,7 @@ class EventItem extends StatelessWidget {
                   ],
                 ),
                 Text(
-                 (price == 0 || price == null ? 'FREE' : 'R$price'),
+                  (price == 0 || price == null ? 'FREE' : 'R$price'),
                   style: TextStyle(color: Colors.red[900], fontSize: 14),
                 ),
               ],
@@ -195,9 +155,12 @@ class EventItem extends StatelessWidget {
               ),
             ),
             //TODO put container here
+
             Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
-                child: LoadFirebaseStorageImage(imageRef: imageRef)),
+                child: blobImage != null
+                    ? Image(image: NetworkImage(blobImage.url))
+                    : LoadFirebaseStorageImage(imageRef: imageRef)),
             hideSummary == true ? SizedBox() : Text(summary),
 
             //showInfo == true ? Text(info) : SizedBox(),

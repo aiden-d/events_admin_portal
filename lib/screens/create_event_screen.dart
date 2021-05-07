@@ -1,8 +1,8 @@
 import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
-
 import 'package:amcham_admin_web/components/select_item.dart';
+import 'package:image_whisperer/image_whisperer.dart';
 import 'package:amcham_admin_web/screens/preview_event_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -112,6 +112,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   TimeOfDay endTime;
   File imageFile;
   String imageNameOnFirebase;
+  BlobImage blobImage;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -330,6 +331,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     uploadInput.onChange.listen((event) async {
       final file = uploadInput.files.first;
+      print("dir = " + uploadInput.dirName);
       imageSize = double.parse(file.size.toString()) / 1000;
       print(imageSize);
       if (imageSize <= 150 && file != null) {
@@ -347,6 +349,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         print('error with picker');
         return;
       }
+      setState(() {
+        blobImage = new BlobImage(file, name: file.name);
+      });
 
       return file;
     });
@@ -408,6 +413,65 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         '${_time.hour < 10 ? '0' + _time.hour.toString() : _time.hour}${_time.minute < 10 ? '0' + _time.minute.toString() : _time.minute}';
     timeInt = int.parse(timeString);
     return timeInt;
+  }
+
+  bool validate() {
+    if (isImageSelected == true &&
+        isDateSelected == true &&
+        isStartTimeSelected == true &&
+        isEndTimeSelected == true) {
+    } else {
+      _alertDialogBuilder('Error', 'Make sure to select items with red text');
+      return false;
+    }
+    if (title == null) {
+      _alertDialogBuilder('Error', 'Title cannot be blank');
+      return false;
+    } else if (title.characters.length > maxTitleChar) {
+      _alertDialogBuilder(
+          'Error', 'Title is too long (max $maxTitleChar characters)');
+      return false;
+    }
+
+    if (category == null) {
+      _alertDialogBuilder('Error', 'Category cannot be blank');
+      return false;
+    }
+    if (price == null) {
+      _alertDialogBuilder('Error', 'Price cannot be blank');
+      return false;
+    }
+    if (link == null) {
+      _alertDialogBuilder('Error', 'Link cannot be blank');
+      return false;
+    }
+    if (link.substring(0, 8) != 'https://' &&
+        link.substring(0, 7) != 'http://') {
+      _alertDialogBuilder('Error', 'Link must contain https:// or http://');
+      return false;
+    }
+    if (summary == null) {
+      _alertDialogBuilder('Error', 'Summary cannot be blank');
+      return false;
+    }
+    if (pastLink != null && pastLink != '') {
+      if (pastLink.substring(0, 8) != 'https://' &&
+          pastLink.substring(0, 7) != 'http://') {
+        _alertDialogBuilder(
+            'Error', 'Past Link must contain https:// or http://');
+        return false;
+      }
+    }
+
+    if (info == null) {
+      _alertDialogBuilder('Error', 'Briefing cannot be blank');
+      return false;
+    }
+    if (blobImage == null && imageNameOnFirebase == null) {
+      _alertDialogBuilder('Error', 'Image cannot be blank');
+      return false;
+    }
+    return true;
   }
 
   Future<bool> validateAndUpload() async {
@@ -961,32 +1025,31 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       ),
                       RoundedButton(
                         title: "Preview",
+                        width: 50,
                         onPressed: () async {
                           var data = await firestore
                               .collection('Events')
                               .doc(id)
                               .get();
+                          if (validate() == false) {
+                            return;
+                          }
                           EventItem item = new EventItem(
-                            pastLink: data['past_link'],
-                            price: data['price'],
-                            date: data['date'],
-                            title: data['title'],
-                            type: data['type'],
-                            category: data['category'],
-                            isMembersOnly: data['isMembersOnly'],
-                            summary: data['summary'],
-                            imageRef: data['image_name'],
-                            info: data['info'],
+                            pastLink: pastLink,
+                            price: price,
+                            date: getDateTimeInt(),
+                            title: title,
+                            type: type,
+                            category: category,
+                            isMembersOnly: isMembersOnly,
+                            summary: summary,
+                            imageRef: imageNameOnFirebase,
+                            info: info,
+                            speakers: itemListMaker.getAsListString(),
                             id: id,
-                            link: data['link'],
-                            registeredUsers: data['registered_users'],
-                            endTime: data['end_time'],
-                            startTime: data['start_time'],
-                            tier1hashes: data['tier_1_hashes'],
-                            tier2hashes: data['tier_2_hashes'],
-                            tier3hashes: data['tier_3_hashes'],
-                            tier4hashes: data['tier_4_hashes'],
-                            speakers: data['speakers'],
+                            link: link,
+                            endTime: getTimeInt(endTime),
+                            blobImage: blobImage,
                           );
                           Navigator.push(
                               context,

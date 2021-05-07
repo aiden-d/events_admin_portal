@@ -82,20 +82,6 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
   }
 
   String userEmail = FirebaseAuth.instance.currentUser.email;
-  bool checkOwnedEvent() {
-    if (item.registeredUsers == null) {
-      return false;
-    }
-    List<dynamic> users = item.registeredUsers;
-
-    for (var user in users) {
-      if (user.toString() == userEmail) {
-        print('event is already owned');
-        return true;
-      }
-    }
-    return false;
-  }
 
   int getDateTimeInt() {
     int val = int.parse(item.date.toString());
