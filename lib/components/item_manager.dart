@@ -103,7 +103,12 @@ class ManageItemStream extends StatelessWidget {
             },
           )
         : FutureBuilder<QuerySnapshot>(
-            future: orderVar != null ? _firestore.collection(collectionName).orderBy(orderVar, descending: true).get() : _firestore.collection(collectionName).get(),
+            future: orderVar != null
+                ? _firestore
+                    .collection(collectionName)
+                    .orderBy(orderVar, descending: true)
+                    .get()
+                : _firestore.collection(collectionName).get(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
                 print(snapshot.error.toString() + collectionName);

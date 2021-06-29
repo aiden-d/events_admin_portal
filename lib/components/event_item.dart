@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:amcham_admin_web/constants.dart';
 import 'package:image_whisperer/image_whisperer.dart';
 import 'get_firebase_image.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class EventItem extends StatelessWidget {
   final int price;
@@ -20,9 +21,10 @@ class EventItem extends StatelessWidget {
   final String info;
   final String id;
   final String link;
-  final String pastLink;
+  final String youtube_link;
   final List speakers;
   final BlobImage blobImage;
+  final String archetype;
   bool isButton;
   bool showInfo;
   bool hideSummary;
@@ -31,6 +33,7 @@ class EventItem extends StatelessWidget {
   Function speakersButtonFunction;
 
   EventItem({
+    @required this.archetype,
     @required this.price,
     @required this.date,
     @required this.title,
@@ -45,10 +48,11 @@ class EventItem extends StatelessWidget {
     @required this.startTime,
     @required this.endTime,
     @required this.speakers,
-    @required this.pastLink,
+    @required this.youtube_link,
     @required this.blobImage,
   });
   int rankedPoints;
+  YoutubePlayerController _controller;
 
   //date must be formated as year/month/day
   String DateToString(int numberDate) {
@@ -154,13 +158,23 @@ class EventItem extends StatelessWidget {
                 ],
               ),
             ),
-            //TODO put container here
-
-            Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: blobImage != null
-                    ? Image(image: NetworkImage(blobImage.url))
-                    : LoadFirebaseStorageImage(imageRef: imageRef)),
+            archetype == "Youtube"
+                ? YoutubePlayerIFrame(
+                    controller: YoutubePlayerController(
+                      initialVideoId:
+                          youtube_link.substring(32, youtube_link.length),
+                      params: YoutubePlayerParams(
+                        showControls: true,
+                        showFullscreenButton: true,
+                      ),
+                    ),
+                    aspectRatio: 16 / 9,
+                  )
+                : Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: blobImage != null
+                        ? Image(image: NetworkImage(blobImage.url))
+                        : LoadFirebaseStorageImage(imageRef: imageRef)),
             hideSummary == true ? SizedBox() : Text(summary),
 
             //showInfo == true ? Text(info) : SizedBox(),
