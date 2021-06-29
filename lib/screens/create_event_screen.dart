@@ -41,7 +41,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         price = data['price'];
         category = data['category'];
         link = data['link'];
-        youtube_link = data['youtube_link'];
+        pastLink = data['past_link'];
         String dateString = data['date'].toString();
         int year = int.parse(dateString.substring(0, 4));
         int month = int.parse(dateString.substring(4, 6));
@@ -89,11 +89,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String summary;
   String info;
   String type = 'Livestream';
-  String archetype = "MS Teams";
   int price = 0;
   String category = 'General';
   String link;
-  String youtube_link = '';
+  String pastLink = '';
   List speakers;
 
   //validation
@@ -442,13 +441,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Price cannot be blank');
       return false;
     }
-    if (link == null && archetype != "Youtube") {
+    if (link == null) {
       _alertDialogBuilder('Error', 'Link cannot be blank');
       return false;
     }
     if (link.substring(0, 8) != 'https://' &&
-        link.substring(0, 7) != 'http://' &&
-        archetype != "Youtube") {
+        link.substring(0, 7) != 'http://') {
       _alertDialogBuilder('Error', 'Link must contain https:// or http://');
       return false;
     }
@@ -456,13 +454,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Summary cannot be blank');
       return false;
     }
-    if (youtube_link == null && archetype == "Youtube") {
-      _alertDialogBuilder('Error', 'Link cannot be blank');
-      return false;
-    }
-    if (archetype == "Youtube" && youtube_link != null && youtube_link != '') {
-      if (youtube_link.substring(0, 8) != 'https://' &&
-          youtube_link.substring(0, 7) != 'http://') {
+    if (pastLink != null && pastLink != '') {
+      if (pastLink.substring(0, 8) != 'https://' &&
+          pastLink.substring(0, 7) != 'http://') {
         _alertDialogBuilder(
             'Error', 'Past Link must contain https:// or http://');
         return false;
@@ -519,9 +513,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Summary cannot be blank');
       return false;
     }
-    if (youtube_link != null && youtube_link != '') {
-      if (youtube_link.substring(0, 8) != 'https://' &&
-          youtube_link.substring(0, 7) != 'http://') {
+    if (pastLink != null && pastLink != '') {
+      if (pastLink.substring(0, 8) != 'https://' &&
+          pastLink.substring(0, 7) != 'http://') {
         _alertDialogBuilder(
             'Error', 'Past Link must contain https:// or http://');
         return false;
@@ -567,7 +561,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
-        'youtube_link': youtube_link,
+        'past_link': pastLink,
         'price': price,
         'start_time': startTimeInt,
         'summary': summary,
@@ -581,7 +575,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'tier_3_hashes': hashes[2],
         'tier_4_hashes': hashes[3],
         'speakers': itemListMaker.getAsListString(),
-        'archetype': archetype
       });
     } else {
       DocumentReference ref = await eventsFB.add({});
@@ -593,7 +586,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'info': info,
         'isMembersOnly': isMembersOnly,
         'link': link,
-        'youtube_link': youtube_link,
+        'past_link': pastLink,
         'price': price,
         'start_time': startTimeInt,
         'summary': summary,
@@ -605,7 +598,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'tier_3_hashes': hashes[2],
         'tier_4_hashes': hashes[3],
         'speakers': itemListMaker.getAsListString(),
-        'archetype': archetype
       });
     }
     print("all good");
@@ -613,6 +605,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return true;
   }
 
+  //TODO validate input fields
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -630,62 +623,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white),
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Event Archetype: ",
-                                style: Constants.regularHeading,
-                              ),
-                              SizedBox(
-                                width: 15,
-                              ),
-                              DropdownButton<String>(
-                                value: archetype,
-                                icon: Icon(Icons.arrow_downward),
-                                iconSize: 24,
-                                elevation: 16,
-                                style: TextStyle(color: Colors.black),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.black,
-                                ),
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    archetype = newValue;
-                                    if (archetype != "Paid Event") {
-                                      price = 0;
-                                    }
-                                  });
-                                },
-                                items: <String>[
-                                  'MS Teams',
-                                  'Youtube',
-                                  'Paid Event',
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        )),
-                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Wrap(
-                      runAlignment: WrapAlignment.spaceEvenly,
+                      spacing: 25.0, // gap between adjacent chips
+                      runSpacing: 8.0,
+
                       children: [
                         InputItem(
                             title: 'Title',
@@ -694,9 +637,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             onChanged: (value) {
                               title = value;
                             }),
-                        SizedBox(
-                          width: 30,
-                        ),
                         Column(
                           children: [
                             Text(
@@ -742,9 +682,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               ),
                             ),
                           ],
-                        ),
-                        SizedBox(
-                          width: 30,
                         ),
                         Column(
                           children: [
@@ -798,30 +735,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(
-                          width: 30,
-                        ),
-                        archetype == "Paid Event"
-                            ? InputItem(
-                                textValue: price.toString(),
-                                isNumber: true,
-                                title: 'Price in ZAR',
-                                hint: 'Price in ZAR',
-                                onChanged: (value) {
-                                  price = int.parse(value);
-                                })
-                            : SizedBox(),
+                        InputItem(
+                            textValue: price.toString(),
+                            isNumber: true,
+                            title: 'Price in ZAR',
+                            hint: 'Price in ZAR',
+                            onChanged: (value) {
+                              price = int.parse(value);
+                            }),
                       ],
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Wrap(
-                      runAlignment: WrapAlignment.spaceEvenly,
-                      alignment: WrapAlignment.spaceEvenly,
-
-                      // spacing: 30.0, // gap between adjacent chips
-                      // runSpacing: 8.0,
+                      spacing: 30.0, // gap between adjacent chips
+                      runSpacing: 8.0,
                       children: [
                         SelectItem(
                           width: 100,
@@ -902,77 +831,72 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     ),
                   ),
                   itemListMaker,
-                  archetype != "Youtube"
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 20),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Link to event',
-                                style: Constants.logoTitleStyle,
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: Colors.white,
-                                ),
-                                child: new TextField(
-                                  controller: TextEditingController(text: link),
-                                  onChanged: (value) {
-                                    link = value;
-                                  },
-                                  //grow automatically
-
-                                  decoration: new InputDecoration.collapsed(
-                                    hintText: 'Link to event',
-                                  ),
-                                ),
-                              ),
-                            ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 20),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Link to event',
+                          style: Constants.logoTitleStyle,
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
                           ),
-                        )
-                      : SizedBox(),
-                  archetype == "Youtube"
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 20),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Youtube Link:',
-                                style: Constants.logoTitleStyle,
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: Colors.white,
-                                ),
-                                child: new TextField(
-                                  controller:
-                                      TextEditingController(text: youtube_link),
-                                  onChanged: (value) {
-                                    youtube_link = value;
-                                  },
-                                  //grow automatically
+                          child: new TextField(
+                            controller: TextEditingController(text: link),
+                            onChanged: (value) {
+                              link = value;
+                            },
+                            //grow automatically
 
-                                  decoration: new InputDecoration.collapsed(
-                                    hintText: 'Link to Youtube Video',
-                                  ),
-                                ),
-                              ),
-                            ],
+                            decoration: new InputDecoration.collapsed(
+                              hintText: 'Link to event',
+                            ),
                           ),
-                        )
-                      : SizedBox(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 20),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Link to past event (blank for future)',
+                          style: Constants.logoTitleStyle,
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                          ),
+                          child: new TextField(
+                            controller: TextEditingController(text: pastLink),
+                            onChanged: (value) {
+                              pastLink = value;
+                            },
+                            //grow automatically
+
+                            decoration: new InputDecoration.collapsed(
+                              hintText: 'Link to past event',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 20),
@@ -1111,8 +1035,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             return;
                           }
                           EventItem item = new EventItem(
-                            startTime: getTimeInt(startTime),
-                            youtube_link: youtube_link,
+                            pastLink: pastLink,
                             price: price,
                             date: getDateTimeInt(),
                             title: title,
@@ -1127,7 +1050,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             link: link,
                             endTime: getTimeInt(endTime),
                             blobImage: blobImage,
-                            archetype: archetype,
                           );
                           Navigator.push(
                               context,

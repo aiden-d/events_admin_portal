@@ -76,13 +76,8 @@ class _HomePageState extends State<HomePage> {
                     height: 30,
                   ),
                   ForgotPassword(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    'Version: 12',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  SizedBox(height: 20,),
+                  Text('Version: 11', style: TextStyle(color: Colors.white),),
                 ],
               ),
             ),

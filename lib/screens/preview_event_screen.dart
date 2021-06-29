@@ -169,7 +169,7 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
               alignment: Alignment.bottomCenter,
               child: RoundedButton(
                 title: (getDateTimeInt() < getCurrentDateTimeInt() &&
-                        item.archetype == "MS Teams")
+                        (item.pastLink == "" || item.pastLink == null))
                     ? 'Not Available Yet'
                     : item.price == 0
                         ? 'Register: FREE'

@@ -7,10 +7,8 @@ import 'package:amcham_admin_web/screens/landing_page.dart';
 import 'package:amcham_admin_web/screens/manage_admin_emails.dart';
 import 'package:amcham_admin_web/screens/member_email_manager.dart';
 import 'package:amcham_admin_web/screens/news_home_screen.dart';
-import 'package:amcham_admin_web/screens/testing_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 class ChooserScreen extends StatefulWidget {
   @override
@@ -114,23 +112,6 @@ class _ChooserScreenState extends State<ChooserScreen> {
               radius: 15,
             ),
           ),
-          kReleaseMode == false
-              ? Center(
-                  child: RoundedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TestingScreen()));
-                    },
-                    title: 'Testing',
-                    textStyle: Constants.blueText,
-                    width: 150,
-                    height: 60,
-                    radius: 15,
-                  ),
-                )
-              : SizedBox(),
         ],
       ),
     );
