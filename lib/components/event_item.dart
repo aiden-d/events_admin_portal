@@ -23,6 +23,7 @@ class EventItem extends StatelessWidget {
   final String? link;
   final String? youtube_link;
   final List speakers;
+  final Image? image;
   //final BlobImage blobImage;
   final String? archetype;
   bool? isButton;
@@ -49,6 +50,7 @@ class EventItem extends StatelessWidget {
     required this.endTime,
     required this.speakers,
     required this.youtube_link,
+    required this.image,
     //@required this.blobImage,
   });
   int? rankedPoints;
@@ -172,7 +174,9 @@ class EventItem extends StatelessWidget {
                   )
                 : Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
-                    child: LoadFirebaseStorageImage(imageRef: imageRef)),
+                    child: image != null
+                        ? image
+                        : LoadFirebaseStorageImage(imageRef: imageRef)),
             hideSummary == true ? SizedBox() : Text(summary!),
 
             //showInfo == true ? Text(info) : SizedBox(),

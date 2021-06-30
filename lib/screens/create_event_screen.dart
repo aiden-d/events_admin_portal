@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
@@ -14,6 +16,8 @@ import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:amcham_admin_web/components/event_item.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
 class CreateEventScreen extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -90,7 +94,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String? archetype = "MS Teams";
   int? price = 0;
   String? category = 'General';
-  String? link;
+  String? link = '';
   String? youtube_link = '';
   List<String> speakers = [];
 
@@ -111,6 +115,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   TimeOfDay? endTime;
   File? imageFile;
   String? imageNameOnFirebase;
+  Image? image;
+  PickedFile? pickedImageFile;
   //BlobImage blobImage;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -325,47 +331,92 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   void pickImage() async {
-    InputElement uploadInput = FileUploadInputElement() as InputElement
-      ..accept = 'image/*';
-    uploadInput.click();
+    final _picker = ImagePicker();
+    PickedFile? pickedFile =
+        await _picker.getImage(source: ImageSource.gallery) as PickedFile;
+    pickedImageFile = pickedFile;
+    image = Image.network(pickedFile.path);
+    Uint8List imageData = await pickedFile.readAsBytes();
+    imageSize = imageData.lengthInBytes / 1000;
 
-    uploadInput.onChange.listen((event) async {
-      final file = uploadInput.files!.first;
-      print("dir = " + uploadInput.dirName!);
-      imageSize = double.parse(file.size.toString()) / 1000;
-      print(imageSize);
-      if (imageSize <= 150 && file != null) {
-        setState(() {
-          imageFile = file;
-          isImageSelected = true;
-        });
-        await uploadImage();
-      } else if (imageSize > 150) {
-        return _alertDialogBuilder('Image too large',
-            'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
-        print('file too large');
-        //TODO show error popup box
-      } else {
-        print('error with picker');
-        return;
-      }
+    if (imageSize <= 150 && pickedFile != null) {
       setState(() {
-        //blobImage = new BlobImage(file, name: file.name);
+        image = Image.network(pickedFile.path);
+        print("path=" + pickedFile.path);
+        isImageSelected = true;
       });
-
+      await uploadImage(pickedFile);
       return;
-    });
+    } else if (imageSize > 150) {
+      return _alertDialogBuilder('Image too large',
+          'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    } else {
+      print('error with picker');
+      return;
+    }
 
-    return null;
+    // uploadInput.onChange.listen((event) async {
+    //   final file = uploadInput.files!.first;
+    //   print("dir = " + uploadInput.dirName!);
+    //   imageSize = double.parse(file.size.toString()) / 1000;
+    //   print(imageSize);
+    //   if (imageSize <= 150 && file != null) {
+    //     setState(() {
+    //       imageFile = file;
+    //       isImageSelected = true;
+    //     });
+    //     await uploadImage();
+    //   } else if (imageSize > 150) {
+    //     return _alertDialogBuilder('Image too large',
+    //         'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    //     print('file too large');
+    //     //TODO show error popup box
+    //   } else {
+    //     print('error with picker');
+    //     return;
+    //   }
+    //   setState(() {
+    //     //blobImage = new BlobImage(file, name: file.name);
+    //   });
+
+    //   return;
+    // });
+
+    // return null;
   }
 
-  Future<void> uploadImage() async {
+  Future<void> uploadImage(PickedFile? pickedFile) async {
+    print("Basename = " + Path.basename(pickedFile!.path));
     final dateTime = DateTime.now();
-    imageNameOnFirebase =
-        '${dateTime.toString()}.${imageFile!.name == 'jpeg' ? 'jpg' : imageFile!.name}';
+    imageNameOnFirebase = "${dateTime.toString()}.jpeg";
+
+    //imageNameOnFirebase = '${Path.basename(pickedFile.path)}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
-    await ref.putBlob(imageFile!.slice());
+    print("made it to put");
+    Uint8List data = await pickedFile.readAsBytes();
+
+    try {
+      await ref
+          .putData(
+        data,
+        firebase_storage.SettableMetadata(contentType: 'image/jpeg'),
+      )
+          .whenComplete(() async {
+        await ref.getDownloadURL().then((value) {
+          print(value);
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    // try {
+    //   await ref.put(_data);
+    // } catch (e) {
+    //   print(e);
+    // }
+
     return;
   }
 
@@ -419,200 +470,172 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   bool validate() {
-    if (isImageSelected == true &&
-        isDateSelected == true &&
-        isStartTimeSelected == true &&
-        isEndTimeSelected == true) {
-    } else {
-      _alertDialogBuilder('Error', 'Make sure to select items with red text');
-      return false;
-    }
-    if (title == null) {
-      _alertDialogBuilder('Error', 'Title cannot be blank');
-      return false;
-    } else if (title!.characters.length > maxTitleChar) {
-      _alertDialogBuilder(
-          'Error', 'Title is too long (max $maxTitleChar characters)');
-      return false;
-    }
-
-    if (category == null) {
-      _alertDialogBuilder('Error', 'Category cannot be blank');
-      return false;
-    }
-    if (price == null) {
-      _alertDialogBuilder('Error', 'Price cannot be blank');
-      return false;
-    }
-    if (link == null && archetype != "Youtube") {
-      _alertDialogBuilder('Error', 'Link cannot be blank');
-      return false;
-    }
-    if (link!.substring(0, 8) != 'https://' &&
-        link!.substring(0, 7) != 'http://' &&
-        archetype != "Youtube") {
-      _alertDialogBuilder('Error', 'Link must contain https:// or http://');
-      return false;
-    }
-    if (summary == null) {
-      _alertDialogBuilder('Error', 'Summary cannot be blank');
-      return false;
-    }
-    if (youtube_link == null && archetype == "Youtube") {
-      _alertDialogBuilder('Error', 'Link cannot be blank');
-      return false;
-    }
-    if (archetype == "Youtube" && youtube_link != null && youtube_link != '') {
-      if (youtube_link!.substring(0, 8) != 'https://' &&
-          youtube_link!.substring(0, 7) != 'http://') {
-        _alertDialogBuilder(
-            'Error', 'Past Link must contain https:// or http://');
+    try {
+      if (isImageSelected == true &&
+          isDateSelected == true &&
+          isStartTimeSelected == true &&
+          isEndTimeSelected == true) {
+      } else {
+        _alertDialogBuilder('Error', 'Make sure to select items with red text');
         return false;
       }
-    }
+      if (title == null) {
+        _alertDialogBuilder('Error', 'Title cannot be blank');
+        return false;
+      } else if (title!.characters.length > maxTitleChar) {
+        _alertDialogBuilder(
+            'Error', 'Title is too long (max $maxTitleChar characters)');
+        return false;
+      }
 
-    if (info == null) {
-      _alertDialogBuilder('Error', 'Briefing cannot be blank');
+      if (category == null) {
+        _alertDialogBuilder('Error', 'Category cannot be blank');
+        return false;
+      }
+      if (price == null) {
+        _alertDialogBuilder('Error', 'Price cannot be blank');
+        return false;
+      }
+      if (link == null && archetype != "Youtube") {
+        _alertDialogBuilder('Error', 'Link cannot be blank');
+        return false;
+      }
+      if (youtube_link == null && archetype == "Youtube") {
+        _alertDialogBuilder('Error', 'Link cannot be blank');
+        return false;
+      }
+      if (archetype != "Youtube") {
+        if (link!.substring(0, 8) != 'https://' &&
+            link!.substring(0, 7) != 'http://') {
+          _alertDialogBuilder('Error', 'Link must contain https:// or http://');
+          return false;
+        }
+      }
+
+      if (summary == null) {
+        _alertDialogBuilder('Error', 'Summary cannot be blank');
+        return false;
+      }
+      if (youtube_link == null && archetype == "Youtube") {
+        _alertDialogBuilder('Error', 'Link cannot be blank');
+        return false;
+      }
+      if (archetype == "Youtube" &&
+          youtube_link != null &&
+          youtube_link != '') {
+        if (youtube_link!.substring(0, 8) != 'https://' &&
+            youtube_link!.substring(0, 7) != 'http://') {
+          _alertDialogBuilder(
+              'Error', 'Past Link must contain https:// or http://');
+          return false;
+        }
+      }
+
+      if (info == null) {
+        _alertDialogBuilder('Error', 'Briefing cannot be blank');
+        return false;
+      }
+      // if (blobImage == null && imageNameOnFirebase == null) {
+      //   _alertDialogBuilder('Error', 'Image cannot be blank');
+      //   return false;
+      // }
+      return true;
+    } catch (e, stacktrace) {
+      print(e);
+      print(stacktrace);
       return false;
     }
-    // if (blobImage == null && imageNameOnFirebase == null) {
-    //   _alertDialogBuilder('Error', 'Image cannot be blank');
-    //   return false;
-    // }
-    return true;
   }
 
   Future<bool> validateAndUpload() async {
-    if (isImageSelected == true &&
-        isDateSelected == true &&
-        isStartTimeSelected == true &&
-        isEndTimeSelected == true) {
-    } else {
-      _alertDialogBuilder('Error', 'Make sure to select items with red text');
+    if (validate() == false) {
       return false;
     }
-    if (title == null) {
-      _alertDialogBuilder('Error', 'Title cannot be blank');
-      return false;
-    } else if (title!.characters.length > maxTitleChar) {
-      _alertDialogBuilder(
-          'Error', 'Title is too long (max $maxTitleChar characters)');
-      return false;
-    }
-
-    if (category == null) {
-      _alertDialogBuilder('Error', 'Category cannot be blank');
-      return false;
-    }
-    if (price == null) {
-      _alertDialogBuilder('Error', 'Price cannot be blank');
-      return false;
-    }
-    if (link == null && archetype != "Youtube") {
-      _alertDialogBuilder('Error', 'Link cannot be blank');
-      return false;
-    }
-    if (link!.substring(0, 8) != 'https://' &&
-        link!.substring(0, 7) != 'http://') {
-      _alertDialogBuilder('Error', 'Link must contain https:// or http://');
-      return false;
-    }
-    if (summary == null) {
-      _alertDialogBuilder('Error', 'Summary cannot be blank');
-      return false;
-    }
-    if (youtube_link != null && youtube_link != '') {
-      if (youtube_link!.substring(0, 8) != 'https://' &&
-          youtube_link!.substring(0, 7) != 'http://') {
-        _alertDialogBuilder(
-            'Error', 'Past Link must contain https:// or http://');
-        return false;
+    try {
+      if (imageNameOnFirebase != null && data != null) {
+        print('image already on firebase ');
+      } else {
+        await uploadImage(pickedImageFile!);
       }
-    }
+      CollectionReference eventsFB =
+          FirebaseFirestore.instance.collection('Events');
 
-    if (info == null) {
-      _alertDialogBuilder('Error', 'Briefing cannot be blank');
-      return false;
-    }
-    if (imageNameOnFirebase != null && data != null) {
-      print('image already on firebase ');
-    } else {
-      await uploadImage();
-    }
-    CollectionReference eventsFB =
-        FirebaseFirestore.instance.collection('Events');
+      int dateInt = getDateTimeInt();
+      int endTimeInt = getTimeInt(endTime!);
+      int startTimeInt = getTimeInt(startTime!);
 
-    int dateInt = getDateTimeInt();
-    int endTimeInt = getTimeInt(endTime!);
-    int startTimeInt = getTimeInt(startTime!);
-
-    List<List<int>> hashes = GenerateHashes();
-    //upload to firebase
-    if (data != null) {
-      print('data != null');
-      var doc = await eventsFB.doc(id).get();
-      List? rUsers = [];
-      try {
-        if (doc['registered_users'] != null) {
-          rUsers = doc['registered_users'];
+      List<List<int>> hashes = GenerateHashes();
+      //upload to firebase
+      if (data != null) {
+        print('data != null');
+        var doc = await eventsFB.doc(id).get();
+        List? rUsers = [];
+        try {
+          if (doc['registered_users'] != null) {
+            rUsers = doc['registered_users'];
+          }
+        } catch (e) {
+          print('user error');
+          print(e);
         }
-      } catch (e) {
-        print('user error');
-        print(e);
+
+        await eventsFB.doc(id).set({
+          'category': category,
+          'date': dateInt,
+          'end_time': endTimeInt,
+          'image_name': imageNameOnFirebase,
+          'info': info,
+          'isMembersOnly': isMembersOnly,
+          'link': link,
+          'youtube_link': youtube_link,
+          'price': price,
+          'start_time': startTimeInt,
+          'summary': summary,
+          'title': title,
+          'type': type,
+          'id': id,
+          'registered_users': rUsers,
+          //todo FIX
+          'tier_1_hashes': hashes[0],
+          'tier_2_hashes': hashes[1],
+          'tier_3_hashes': hashes[2],
+          'tier_4_hashes': hashes[3],
+          'speakers': itemListMaker.getAsListString(),
+          'archetype': archetype
+        });
+      } else {
+        DocumentReference ref = await eventsFB.add({'test': 'test'});
+        await eventsFB.doc(ref.id).set({
+          'category': category,
+          'date': dateInt,
+          'end_time': endTimeInt,
+          'image_name': imageNameOnFirebase,
+          'info': info,
+          'isMembersOnly': isMembersOnly,
+          'link': link,
+          'youtube_link': youtube_link,
+          'price': price,
+          'start_time': startTimeInt,
+          'summary': summary,
+          'title': title,
+          'type': type,
+          'id': ref.id,
+          'tier_1_hashes': hashes[0],
+          'tier_2_hashes': hashes[1],
+          'tier_3_hashes': hashes[2],
+          'tier_4_hashes': hashes[3],
+          'speakers': itemListMaker.getAsListString(),
+          'archetype': archetype
+        });
       }
+      print("all good");
 
-      await eventsFB.doc(id).set({
-        'category': category,
-        'date': dateInt,
-        'end_time': endTimeInt,
-        'image_name': imageNameOnFirebase,
-        'info': info,
-        'isMembersOnly': isMembersOnly,
-        'link': link,
-        'youtube_link': youtube_link,
-        'price': price,
-        'start_time': startTimeInt,
-        'summary': summary,
-        'title': title,
-        'type': type,
-        'id': id,
-        'registered_users': rUsers,
-        //todo FIX
-        'tier_1_hashes': hashes[0],
-        'tier_2_hashes': hashes[1],
-        'tier_3_hashes': hashes[2],
-        'tier_4_hashes': hashes[3],
-        'speakers': itemListMaker.getAsListString(),
-        'archetype': archetype
-      });
-    } else {
-      DocumentReference ref = await eventsFB.add({});
-      await eventsFB.doc(ref.id).set({
-        'category': category,
-        'date': dateInt,
-        'end_time': endTimeInt,
-        'image_name': imageNameOnFirebase,
-        'info': info,
-        'isMembersOnly': isMembersOnly,
-        'link': link,
-        'youtube_link': youtube_link,
-        'price': price,
-        'start_time': startTimeInt,
-        'summary': summary,
-        'title': title,
-        'type': type,
-        'id': ref.id,
-        'tier_1_hashes': hashes[0],
-        'tier_2_hashes': hashes[1],
-        'tier_3_hashes': hashes[2],
-        'tier_4_hashes': hashes[3],
-        'speakers': itemListMaker.getAsListString(),
-        'archetype': archetype
-      });
+      return true;
+    } catch (e, stacktrace) {
+      print(e);
+      print(stacktrace);
+      return false;
     }
-    print("all good");
-
-    return true;
   }
 
   @override
@@ -831,13 +854,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           buttonText: 'Select New Image (max 150KB)',
                           title: isImageSelected == true
                               ? (imageFile != null
-                                  ? 'Image Selected (${imageFile!.name})'
-                                  : 'Image Selected (${imageNameOnFirebase})')
+                                  ? 'Image Selected'
+                                  : 'Image Selected')
                               : 'Image Not Selected',
                           onPressed: () async {
                             pickImage();
                           },
                         ),
+                        isImageSelected == true && image != null
+                            ? Container(
+                                width: 40,
+                                height: 22,
+                                child: image,
+                              )
+                            : SizedBox(),
                         SelectItem(
                           isNoError: isDateSelected,
                           title: isDateSelected == true
@@ -1105,37 +1135,43 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         title: "Preview",
                         width: 50,
                         onPressed: () async {
-                          var data = await firestore
-                              .collection('Events')
-                              .doc(id)
-                              .get();
+                          // var data = await firestore
+                          //     .collection('Events')
+                          //     .doc(id)
+                          //     .get();
                           if (validate() == false) {
                             return;
                           }
-                          EventItem item = new EventItem(
-                            startTime: getTimeInt(startTime!),
-                            youtube_link: youtube_link,
-                            price: price,
-                            date: getDateTimeInt(),
-                            title: title,
-                            type: type,
-                            category: category,
-                            isMembersOnly: isMembersOnly,
-                            summary: summary,
-                            imageRef: imageNameOnFirebase,
-                            info: info,
-                            speakers: itemListMaker.getAsListString(),
-                            id: id,
-                            link: link,
-                            endTime: getTimeInt(endTime!),
-                            //blobImage: blobImage,
-                            archetype: archetype,
-                          );
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      SingleEventScreen(item: item)));
+                          print("validate completed");
+                          try {
+                            EventItem item = new EventItem(
+                              startTime: getTimeInt(startTime!),
+                              youtube_link: youtube_link,
+                              price: price,
+                              date: getDateTimeInt(),
+                              title: title,
+                              type: type,
+                              category: category,
+                              isMembersOnly: isMembersOnly,
+                              summary: summary,
+                              imageRef: imageNameOnFirebase,
+                              info: info,
+                              speakers: itemListMaker.getAsListString(),
+                              id: id,
+                              link: link,
+                              endTime: getTimeInt(endTime!),
+                              //blobImage: blobImage,
+                              archetype: archetype,
+                              image: image,
+                            );
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        SingleEventScreen(item: item)));
+                          } catch (e) {
+                            print(e);
+                          }
                         },
                       )
                     ],

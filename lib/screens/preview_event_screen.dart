@@ -8,6 +8,7 @@ import 'package:amcham_admin_web/components/event_item.dart';
 class SingleEventScreen extends StatefulWidget {
   String testStr = '';
   final EventItem item;
+
   String DateToString(int numberDate) {
     String strNumberDate = numberDate.toString();
     String year = strNumberDate.substring(0, 4);
@@ -33,7 +34,9 @@ class SingleEventScreen extends StatefulWidget {
     return '$day $month $year';
   }
 
-  SingleEventScreen({required this.item});
+  SingleEventScreen({
+    required this.item,
+  });
   @override
   _SingleEventScreenState createState() => _SingleEventScreenState(item: item);
 }

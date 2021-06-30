@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:path/path.dart' as Path;
 import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
@@ -15,6 +17,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../components/rounded_button.dart';
 
@@ -285,43 +288,91 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   }
 
   void pickImage() async {
-    InputElement uploadInput = FileUploadInputElement() as InputElement
-      ..accept = 'image/*';
-    uploadInput.click();
+    final _picker = ImagePicker();
+    PickedFile? pickedFile =
+        await _picker.getImage(source: ImageSource.gallery) as PickedFile;
 
-    uploadInput.onChange.listen((event) async {
-      final file = uploadInput.files!.first;
-      imageSize = double.parse(file.size.toString()) / 1000;
-      print(imageSize);
-      if (imageSize <= 150 && file != null) {
-        setState(() {
-          imageFile = file;
-          isImageSelected = true;
-        });
-        await uploadImage();
-      } else if (imageSize > 150) {
-        return _alertDialogBuilder('Image too large',
-            'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
-        print('file too large');
-        //TODO show error popup box
-      } else {
-        print('error with picker');
-        return;
-      }
+    Uint8List imageData = await pickedFile.readAsBytes();
+    imageSize = imageData.lengthInBytes / 1000;
 
+    if (imageSize <= 150 && pickedFile != null) {
+      setState(() {
+        print("path=" + pickedFile.path);
+        isImageSelected = true;
+      });
+      await uploadImage(pickedFile);
       return;
-    });
+    } else if (imageSize > 150) {
+      return _alertDialogBuilder('Image too large',
+          'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    } else {
+      print('error with picker');
+      return;
+    }
 
-    return null;
+    // uploadInput.onChange.listen((event) async {
+    //   final file = uploadInput.files!.first;
+    //   print("dir = " + uploadInput.dirName!);
+    //   imageSize = double.parse(file.size.toString()) / 1000;
+    //   print(imageSize);
+    //   if (imageSize <= 150 && file != null) {
+    //     setState(() {
+    //       imageFile = file;
+    //       isImageSelected = true;
+    //     });
+    //     await uploadImage();
+    //   } else if (imageSize > 150) {
+    //     return _alertDialogBuilder('Image too large',
+    //         'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    //     print('file too large');
+    //     //TODO show error popup box
+    //   } else {
+    //     print('error with picker');
+    //     return;
+    //   }
+    //   setState(() {
+    //     //blobImage = new BlobImage(file, name: file.name);
+    //   });
+
+    //   return;
+    // });
+
+    // return null;
   }
 
-  Future<void> uploadImage() async {
+  Future<void> uploadImage(PickedFile? pickedFile) async {
+    print("Basename = " + Path.basename(pickedFile!.path));
     final dateTime = DateTime.now();
-    imageNameOnFirebase =
-        '${dateTime.toString()}.${imageFile!.name == 'jpeg' ? 'jpg' : imageFile!.name}';
+    imageNameOnFirebase = "${dateTime.toString()}.jpeg";
+
+    //imageNameOnFirebase = '${Path.basename(pickedFile.path)}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
-    await ref.putBlob(imageFile!.slice());
+    print("made it to put");
+
+    Uint8List data = await pickedFile.readAsBytes();
+
+    try {
+      await ref
+          .putData(
+        data,
+        firebase_storage.SettableMetadata(contentType: 'image/jpeg'),
+      )
+          .whenComplete(() async {
+        await ref.getDownloadURL().then((value) {
+          print(value);
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    // try {
+    //   await ref.put(_data);
+    // } catch (e) {
+    //   print(e);
+    // }
+
     return;
   }
 
@@ -389,7 +440,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
     if (imageNameOnFirebase != null && data != null) {
       print('image already on firebase ');
     } else {
-      await uploadImage();
+      //await uploadImage();
     }
     CollectionReference newsFB = FirebaseFirestore.instance.collection('News');
 
@@ -425,7 +476,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         'tier_3_hashes': hashes[2],
       });
     } else {
-      DocumentReference ref = await newsFB.add({});
+      DocumentReference ref = await newsFB.add({'test': 'test'});
       await newsFB.doc(ref.id).set({
         'date_time': dateTimeInt,
         'image_name': imageNameOnFirebase,
