@@ -7,7 +7,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
-import 'package:firebase/firebase.dart' as fb;
+
 import 'dart:html';
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -498,10 +498,11 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                       ],
                     ),
                   ),
-                  RoundedButton(title: "Copy Bullet Point •", onPressed: (){
-                    FlutterClipboard.copy('• ');
-
-                  }),
+                  RoundedButton(
+                      title: "Copy Bullet Point •",
+                      onPressed: () {
+                        FlutterClipboard.copy('• ');
+                      }),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 20),

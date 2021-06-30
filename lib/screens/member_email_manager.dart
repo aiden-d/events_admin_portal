@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:amcham_admin_web/components/item_manager.dart';
 
-final _firestore = Firestore.instance;
+final _firestore = FirebaseFirestore.instance;
 final _managerStream = ManageItemStream(
   collectionName: 'Admin',
   documentName: 'member_emails',

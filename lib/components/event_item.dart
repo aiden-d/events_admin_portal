@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:amcham_admin_web/constants.dart';
-import 'package:image_whisperer/image_whisperer.dart';
+
 import 'get_firebase_image.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
@@ -23,7 +23,7 @@ class EventItem extends StatelessWidget {
   final String link;
   final String youtube_link;
   final List speakers;
-  final BlobImage blobImage;
+  //final BlobImage blobImage;
   final String archetype;
   bool isButton;
   bool showInfo;
@@ -49,7 +49,7 @@ class EventItem extends StatelessWidget {
     @required this.endTime,
     @required this.speakers,
     @required this.youtube_link,
-    @required this.blobImage,
+    //@required this.blobImage,
   });
   int rankedPoints;
   YoutubePlayerController _controller;
@@ -172,9 +172,7 @@ class EventItem extends StatelessWidget {
                   )
                 : Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
-                    child: blobImage != null
-                        ? Image(image: NetworkImage(blobImage.url))
-                        : LoadFirebaseStorageImage(imageRef: imageRef)),
+                    child: LoadFirebaseStorageImage(imageRef: imageRef)),
             hideSummary == true ? SizedBox() : Text(summary),
 
             //showInfo == true ? Text(info) : SizedBox(),

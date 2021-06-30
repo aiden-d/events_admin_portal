@@ -2,12 +2,10 @@ import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/components/select_item.dart';
-import 'package:image_whisperer/image_whisperer.dart';
 import 'package:amcham_admin_web/screens/preview_event_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amcham_admin_web/constants.dart';
-import 'package:firebase/firebase.dart' as fb;
 import 'dart:html';
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -113,7 +111,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   TimeOfDay endTime;
   File imageFile;
   String imageNameOnFirebase;
-  BlobImage blobImage;
+  //BlobImage blobImage;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -351,7 +349,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         return;
       }
       setState(() {
-        blobImage = new BlobImage(file, name: file.name);
+        //blobImage = new BlobImage(file, name: file.name);
       });
 
       return file;
@@ -473,10 +471,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Briefing cannot be blank');
       return false;
     }
-    if (blobImage == null && imageNameOnFirebase == null) {
-      _alertDialogBuilder('Error', 'Image cannot be blank');
-      return false;
-    }
+    // if (blobImage == null && imageNameOnFirebase == null) {
+    //   _alertDialogBuilder('Error', 'Image cannot be blank');
+    //   return false;
+    // }
     return true;
   }
 
@@ -1126,7 +1124,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             id: id,
                             link: link,
                             endTime: getTimeInt(endTime),
-                            blobImage: blobImage,
+                            //blobImage: blobImage,
                             archetype: archetype,
                           );
                           Navigator.push(

@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/components/item_manager.dart';
 
-final _firestore = Firestore.instance;
+final _firestore = FirebaseFirestore.instance;
 
 class ManageAdminMembers extends StatefulWidget {
   @override

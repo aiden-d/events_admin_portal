@@ -5,6 +5,7 @@ import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TestingScreen extends StatefulWidget {
   @override
@@ -14,6 +15,10 @@ class TestingScreen extends StatefulWidget {
 class _TestingScreenState extends State<TestingScreen> {
   String path = '';
   bool loadingB = false;
+  final _picker = ImagePicker();
+  Image image = new Image.network('google.com');
+  bool isImageSelected = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +41,25 @@ class _TestingScreenState extends State<TestingScreen> {
                   path = path.replaceAll('/', '%2F');
                   print(path);
 
-                  var res = await http.get(
-                      "https://us-central1-amcham-app.cloudfunctions.net/uploadVid?path=$path");
+                  var res = await http.get(Uri.parse(
+                      "https://us-central1-amcham-app.cloudfunctions.net/uploadVid?path=$path"));
                   print(res.body);
 
                   setState(() {
                     loadingB = false;
                   });
                 }),
+            RoundedButton(
+                title: 'Pick Image',
+                onPressed: () async {
+                  var pickedFile =
+                      await _picker.getImage(source: ImageSource.gallery);
+                  setState(() {
+                    image = Image.network(pickedFile.path);
+                    isImageSelected = true;
+                  });
+                }),
+            isImageSelected ? image : SizedBox(),
           ],
         ));
   }
