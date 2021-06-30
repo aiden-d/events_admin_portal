@@ -60,6 +60,7 @@ class _ManageAdminMembersState extends State<ManageAdminMembers> {
                   setState(() {
                     List<ManagerItem> val = _managerStream.getNewValues();
                     val.add(ManagerItem(
+                      isNews: false,
                       deleteFunction: (item) {
                         setState(() {
                           List<ManagerItem> v = _managerStream.getNewValues();

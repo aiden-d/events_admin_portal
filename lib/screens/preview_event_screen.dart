@@ -33,7 +33,7 @@ class SingleEventScreen extends StatefulWidget {
     return '$day $month $year';
   }
 
-  SingleEventScreen({@required this.item});
+  SingleEventScreen({required this.item});
   @override
   _SingleEventScreenState createState() => _SingleEventScreenState(item: item);
 }
@@ -81,7 +81,7 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
     super.initState();
   }
 
-  String userEmail = FirebaseAuth.instance.currentUser.email;
+  String? userEmail = FirebaseAuth.instance.currentUser!.email;
 
   int getDateTimeInt() {
     int val = int.parse(item.date.toString());
@@ -100,7 +100,7 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
     return val;
   }
 
-  _SingleEventScreenState({@required this.item});
+  _SingleEventScreenState({required this.item});
   SpeakersList speakersList = new SpeakersList();
   @override
   Widget build(BuildContext context) {
@@ -158,7 +158,7 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
                   isInfoActive
                       ? Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(item.info),
+                          child: Text(item.info!),
                         )
                       : speakersList,
                 ],
@@ -189,12 +189,12 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
 }
 
 class SpeakersList extends StatelessWidget {
-  final List speakers;
+  final List? speakers;
   SpeakersList({this.speakers});
   List<SpeakerItem> speakerItemList = [];
   void generateSpeakers() {
     print('speaekrs 2 = $speakers');
-    for (String s in speakers) {
+    for (String? s in speakers as Iterable<String?>) {
       speakerItemList.add(SpeakerItem(
         title: s,
       ));
@@ -213,7 +213,7 @@ class SpeakersList extends StatelessWidget {
 }
 
 class SpeakerItem extends StatelessWidget {
-  final String title;
+  final String? title;
   SpeakerItem({this.title});
   @override
   Widget build(BuildContext context) {

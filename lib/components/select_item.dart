@@ -7,13 +7,13 @@ class SelectItem extends StatelessWidget {
   final String title;
   final String buttonText;
   final bool isNoError;
-  final int width;
+  final int? width;
 
   SelectItem({
-    @required this.onPressed,
-    @required this.title,
-    @required this.buttonText,
-    @required this.isNoError,
+    required this.onPressed,
+    required this.title,
+    required this.buttonText,
+    required this.isNoError,
     this.width,
   });
   @override
@@ -29,7 +29,7 @@ class SelectItem extends StatelessWidget {
                 : Constants.logoTitleStyleError,
           ),
           RoundedButton(
-            width: width != null ? width : 50,
+            width: width != null ? width as double? : 50,
             title: buttonText,
             onPressed: onPressed,
           ),

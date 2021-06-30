@@ -55,7 +55,7 @@ class _TestingScreenState extends State<TestingScreen> {
                   var pickedFile =
                       await _picker.getImage(source: ImageSource.gallery);
                   setState(() {
-                    image = Image.network(pickedFile.path);
+                    image = Image.network(pickedFile!.path);
                     isImageSelected = true;
                   });
                 }),

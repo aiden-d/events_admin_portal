@@ -5,17 +5,21 @@ import 'package:amcham_admin_web/constants.dart';
 import 'package:clipboard/clipboard.dart';
 
 class ViewMembersScreen extends StatefulWidget {
-  final String id;
-  final String title;
-  ViewMembersScreen({@required this.id, @required this.title});
+  final String? id;
+
+  ViewMembersScreen({
+    required this.id,
+  });
   @override
   _ViewMembersScreenState createState() => _ViewMembersScreenState(id: id);
 }
 
 class _ViewMembersScreenState extends State<ViewMembersScreen> {
-  final String id;
-  final String title;
-  _ViewMembersScreenState({@required this.id, @required this.title});
+  final String? id;
+
+  _ViewMembersScreenState({
+    required this.id,
+  });
   ManageItemStream _manageItemStream = new ManageItemStream(
       collectionName: null,
       documentName: null,
@@ -59,7 +63,7 @@ class _ViewMembersScreenState extends State<ViewMembersScreen> {
                     String items = '';
                     print(ManageItemStream.items[0].prevValue);
                     for (ManagerItem i in ManageItemStream.items) {
-                      items = items + i.prevValue + ',';
+                      items = items + i.prevValue! + ',';
                     }
                     items = items.substring(0, items.length - 1);
                     print(items);

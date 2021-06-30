@@ -5,9 +5,9 @@ class FeedbackBuilder {
     String title,
     String info,
     BuildContext context, [
-    String closeButtonTitle,
-    bool isProceedButton,
-    Function proceedFunction,
+    String? closeButtonTitle,
+    bool? isProceedButton,
+    Function? proceedFunction,
   ]) async {
     return showDialog(
         barrierDismissible: false,
@@ -25,10 +25,10 @@ class FeedbackBuilder {
                   },
                   child: Text(
                       closeButtonTitle != null ? closeButtonTitle : "Close")),
-              isProceedButton
+              isProceedButton!
                   ? FlatButton(
                       onPressed: () {
-                        proceedFunction();
+                        proceedFunction!();
                       },
                       child: Text(closeButtonTitle != null
                           ? closeButtonTitle

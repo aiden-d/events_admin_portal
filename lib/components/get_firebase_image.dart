@@ -5,8 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 class LoadFirebaseStorageImage extends StatelessWidget {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
-  final String imageRef;
-  LoadFirebaseStorageImage({@required this.imageRef});
+  final String? imageRef;
+  LoadFirebaseStorageImage({required this.imageRef});
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -18,7 +18,7 @@ class LoadFirebaseStorageImage extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 image: new DecorationImage(
-                  image: snapshot.data,
+                  image: snapshot.data as ImageProvider,
                   //TODO  IMAGE STREAMING
                   // image: Image.network(getImage(refStr)),
                   fit: BoxFit.fitHeight,
@@ -41,7 +41,8 @@ class LoadFirebaseStorageImage extends StatelessWidget {
         });
   }
 
-  Future<NetworkImage> _getImage(BuildContext context, String _imageRef) async {
+  Future<NetworkImage> _getImage(
+      BuildContext context, String? _imageRef) async {
     NetworkImage m;
 
     String url = await firebase_storage.FirebaseStorage.instance

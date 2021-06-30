@@ -6,53 +6,53 @@ import 'get_firebase_image.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class EventItem extends StatelessWidget {
-  final int price;
+  final int? price;
   //date must be formated as year/month/day
   final int date;
   //time formatted as hhmm or hour hour minute minute
   final int startTime;
   final int endTime;
-  final String title;
-  final String type;
-  final String category;
-  final bool isMembersOnly;
-  final String summary;
-  final String imageRef;
-  final String info;
-  final String id;
-  final String link;
-  final String youtube_link;
+  final String? title;
+  final String? type;
+  final String? category;
+  final bool? isMembersOnly;
+  final String? summary;
+  final String? imageRef;
+  final String? info;
+  final String? id;
+  final String? link;
+  final String? youtube_link;
   final List speakers;
   //final BlobImage blobImage;
-  final String archetype;
-  bool isButton;
-  bool showInfo;
-  bool hideSummary;
+  final String? archetype;
+  bool? isButton;
+  bool? showInfo;
+  bool? hideSummary;
   bool isInfoSelected = true;
-  Function infoButtonFunction;
-  Function speakersButtonFunction;
+  Function? infoButtonFunction;
+  Function? speakersButtonFunction;
 
   EventItem({
-    @required this.archetype,
-    @required this.price,
-    @required this.date,
-    @required this.title,
-    @required this.type,
-    @required this.category,
-    @required this.isMembersOnly,
-    @required this.summary,
-    @required this.imageRef,
-    @required this.info,
-    @required this.id,
-    @required this.link,
-    @required this.startTime,
-    @required this.endTime,
-    @required this.speakers,
-    @required this.youtube_link,
+    required this.archetype,
+    required this.price,
+    required this.date,
+    required this.title,
+    required this.type,
+    required this.category,
+    required this.isMembersOnly,
+    required this.summary,
+    required this.imageRef,
+    required this.info,
+    required this.id,
+    required this.link,
+    required this.startTime,
+    required this.endTime,
+    required this.speakers,
+    required this.youtube_link,
     //@required this.blobImage,
   });
-  int rankedPoints;
-  YoutubePlayerController _controller;
+  int? rankedPoints;
+  YoutubePlayerController? _controller;
 
   //date must be formated as year/month/day
   String DateToString(int numberDate) {
@@ -128,13 +128,13 @@ class EventItem extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      title,
+                      title!,
                       style: Constants.regularHeading
-                          .copyWith(fontSize: title.length > 25 ? 16 : 19),
+                          .copyWith(fontSize: title!.length > 25 ? 16 : 19),
                     ),
                   ),
                   Text(
-                    type,
+                    type!,
                     style: TextStyle(
                         color: Constants.blueThemeColor, fontSize: 16),
                   ),
@@ -147,7 +147,7 @@ class EventItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    category,
+                    category!,
                     style: TextStyle(
                         color: Constants.blueThemeColor, fontSize: 16),
                   ),
@@ -162,7 +162,7 @@ class EventItem extends StatelessWidget {
                 ? YoutubePlayerIFrame(
                     controller: YoutubePlayerController(
                       initialVideoId:
-                          youtube_link.substring(32, youtube_link.length),
+                          youtube_link!.substring(32, youtube_link!.length),
                       params: YoutubePlayerParams(
                         showControls: true,
                         showFullscreenButton: true,
@@ -173,7 +173,7 @@ class EventItem extends StatelessWidget {
                 : Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: LoadFirebaseStorageImage(imageRef: imageRef)),
-            hideSummary == true ? SizedBox() : Text(summary),
+            hideSummary == true ? SizedBox() : Text(summary!),
 
             //showInfo == true ? Text(info) : SizedBox(),
           ],

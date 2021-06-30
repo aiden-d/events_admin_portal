@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
   }
 
-  Future<String> _createAccount() async {
+  Future<String?> _createAccount() async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: _email, password: _password);
@@ -60,19 +60,19 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       isLoading = true;
     });
-    String _createAccountFeedback = await _createAccount();
+    String? _createAccountFeedback = await _createAccount();
     if (_createAccountFeedback != null) {
       _alertDialogBuilder('Error', _createAccountFeedback);
     } else {
-      List emails;
+      List? emails;
       await FirebaseFirestore.instance
           .collection('Admin')
           .doc('admin_permissions')
           .get()
-          .then((value) => emails = value.data()['admin_emails']);
+          .then((value) => emails = value.data()!['admin_emails']);
       if (emails != null) {
-        for (var email in emails) {
-          if (email.toString() == FirebaseAuth.instance.currentUser.email) {
+        for (var email in emails!) {
+          if (email.toString() == FirebaseAuth.instance.currentUser!.email) {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => ChooserScreen()));
             return;
@@ -92,11 +92,11 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email = "";
   String _password = "";
 
-  FocusNode _lastNameFocusNode;
-  FocusNode _companyFocusNode;
-  FocusNode _emailFocusNode;
-  FocusNode _passwordFocusNode;
-  FocusNode _passwordConfFocusNode;
+  late FocusNode _lastNameFocusNode;
+  late FocusNode _companyFocusNode;
+  FocusNode? _emailFocusNode;
+  FocusNode? _passwordFocusNode;
+  late FocusNode _passwordConfFocusNode;
   @override
   void initState() {
     _lastNameFocusNode = FocusNode();
@@ -112,8 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _lastNameFocusNode.dispose();
     _companyFocusNode.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
+    _emailFocusNode!.dispose();
+    _passwordFocusNode!.dispose();
     _passwordConfFocusNode.dispose();
 
     super.dispose();
@@ -168,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     focusNode: _emailFocusNode,
                     onSubmitted: (value) {
-                      _passwordFocusNode.requestFocus();
+                      _passwordFocusNode!.requestFocus();
                     },
                     textInputAction: TextInputAction.next,
                   ),

@@ -10,17 +10,17 @@ import 'rounded_text_field.dart';
 
 class ManageItemStream extends StatelessWidget {
   static List<ManagerItem> items = [];
-  final String collectionName;
-  final String documentName;
-  final String variableName;
-  final bool isDocumentSnapshot;
-  final bool isEditable;
-  final String hintText;
-  final bool shouldBeTextField;
-  final Widget onDataNull;
-  final bool isNews;
-  final Function(ManagerItem item) deleteFunction;
-  final String orderVar;
+  final String? collectionName;
+  final String? documentName;
+  final String? variableName;
+  final bool? isDocumentSnapshot;
+  final bool? isEditable;
+  final String? hintText;
+  final bool? shouldBeTextField;
+  final Widget? onDataNull;
+  final bool? isNews;
+  final Function(ManagerItem item)? deleteFunction;
+  final String? orderVar;
   bool isDataNull = false;
   bool getIfDataNull() {
     return isDataNull;
@@ -29,11 +29,11 @@ class ManageItemStream extends StatelessWidget {
   List<ManagerItem> newValues = [];
 
   ManageItemStream({
-    @required this.collectionName,
-    @required this.documentName,
-    @required this.variableName,
-    @required this.isDocumentSnapshot,
-    @required this.hintText,
+    required this.collectionName,
+    required this.documentName,
+    required this.variableName,
+    required this.isDocumentSnapshot,
+    required this.hintText,
     this.orderVar,
     this.isEditable,
     this.deleteFunction,
@@ -52,10 +52,10 @@ class ManageItemStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isDocumentSnapshot
+    return isDocumentSnapshot!
         ? FutureBuilder<DocumentSnapshot>(
             future:
-                _firestore.collection(collectionName).doc(documentName).get(),
+                _firestore.collection(collectionName!).doc(documentName).get(),
             builder: (BuildContext context,
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.hasError) {
@@ -64,24 +64,24 @@ class ManageItemStream extends StatelessWidget {
 
               if (snapshot.connectionState == ConnectionState.done) {
                 items = [];
-                Map<String, dynamic> data = snapshot.data.data();
-                List variableData;
+                Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+                List? variableData;
                 try {
-                  variableData = data[variableName];
+                  variableData = data[variableName!];
                 } catch (e) {
                   print(e);
                   isDataNull = true;
-                  return onDataNull != null ? onDataNull : Text('No data');
+                  return onDataNull != null ? onDataNull! : Text('No data');
                 }
                 print('varData = $variableData');
                 if (variableData == null) {
                   print('null');
                   isDataNull = true;
-                  return onDataNull != null ? onDataNull : Text('No data');
+                  return onDataNull != null ? onDataNull! : Text('No data');
                 }
                 isDataNull = false;
 
-                for (String e in variableData) {
+                for (String e in variableData as Iterable<String>) {
                   items.add(ManagerItem(
                     shouldBeTextField: shouldBeTextField,
                     deleteFunction: deleteFunction,
@@ -105,22 +105,22 @@ class ManageItemStream extends StatelessWidget {
         : FutureBuilder<QuerySnapshot>(
             future: orderVar != null
                 ? _firestore
-                    .collection(collectionName)
-                    .orderBy(orderVar, descending: true)
+                    .collection(collectionName!)
+                    .orderBy(orderVar!, descending: true)
                     .get()
-                : _firestore.collection(collectionName).get(),
+                : _firestore.collection(collectionName!).get(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) {
-                print(snapshot.error.toString() + collectionName);
+                print(snapshot.error.toString() + collectionName!);
                 return Text("Something went wrong");
               }
               items = [];
 
               if (snapshot.connectionState == ConnectionState.done) {
-                for (var doc in snapshot.data.docs) {
-                  Map<String, dynamic> data = doc.data();
-                  String title = data[variableName];
-                  String id = data['id'];
+                for (var doc in snapshot.data!.docs) {
+                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                  String? title = data[variableName!];
+                  String? id = data['id'];
 
                   items.add(ManagerItem(
                     shouldBeTextField: shouldBeTextField,
@@ -147,9 +147,9 @@ class ManageItemStream extends StatelessWidget {
           );
   }
 
-  Future<void> publishChanges({Function pushClass}) async {
-    if (isDocumentSnapshot) {
-      List<String> endingsString = [];
+  Future<void> publishChanges({Function? pushClass}) async {
+    if (isDocumentSnapshot!) {
+      List<String?> endingsString = [];
       for (var e in items) {
         if (e == null) {
           //TODO show error
@@ -173,12 +173,12 @@ class ManageItemStream extends StatelessWidget {
       }
       newValues = [];
       await _firestore
-          .collection(collectionName)
+          .collection(collectionName!)
           .doc(documentName)
-          .update({variableName: endingsString})
+          .update({variableName!: endingsString})
           .then((value) => print("Updated"))
           .catchError((error) => print("Failed to update: $error"));
-      pushClass();
+      pushClass!();
       // Navigator.pushReplacement(
       //     context, MaterialPageRoute(builder: (context) => classToPush));
 
@@ -194,24 +194,24 @@ class ManageItemStream extends StatelessWidget {
           return null;
         }
         if (e.newValue == "") {
-          await _firestore.collection(collectionName).doc(e.docID).delete();
+          await _firestore.collection(collectionName!).doc(e.docID).delete();
         } else if (await e
-            .checkToDeleteSelf(_firestore.collection(collectionName))) {
+            .checkToDeleteSelf(_firestore.collection(collectionName!))) {
           print('ii');
         } else {
           print('i');
           if (e.newValue != null) {
             await _firestore
-                .collection(collectionName)
+                .collection(collectionName!)
                 .doc(e.docID)
-                .update({variableName: e.newValue})
+                .update({variableName!: e.newValue})
                 .then((value) => print("Updated"))
                 .catchError((error) => print("Failed to update: $error"));
           }
         }
       }
 
-      pushClass();
+      pushClass!();
       // Navigator.pushReplacement(
       //     context, MaterialPageRoute(builder: (context) => classToPush));
 
@@ -221,22 +221,22 @@ class ManageItemStream extends StatelessWidget {
 }
 
 class ManagerItem extends StatelessWidget {
-  final String prevValue;
+  final String? prevValue;
   final bool isFromWeb;
-  final String hintText;
-  final String docID;
-  final Map<String, dynamic> data;
-  final bool isEditable;
-  final Function(ManagerItem item) deleteFunction;
-  final Function(ManagerItem item) reAddFunction;
-  final bool shouldBeTextField;
-  final bool isNews;
+  final String? hintText;
+  final String? docID;
+  final Map<String, dynamic>? data;
+  final bool? isEditable;
+  final Function(ManagerItem item)? deleteFunction;
+  final Function(ManagerItem item)? reAddFunction;
+  final bool? shouldBeTextField;
+  final bool? isNews;
 
   ManagerItem({
-    @required this.prevValue,
-    @required this.isFromWeb,
-    @required this.hintText,
-    @required this.isNews,
+    required this.prevValue,
+    required this.isFromWeb,
+    required this.hintText,
+    required this.isNews,
     this.docID,
     this.data,
     this.isEditable,
@@ -244,7 +244,7 @@ class ManagerItem extends StatelessWidget {
     this.reAddFunction,
     this.shouldBeTextField,
   });
-  String newValue;
+  String? newValue;
   bool isLoading = false;
 
   bool toBeDeleted = false;
@@ -320,19 +320,19 @@ class ManagerItem extends StatelessWidget {
                   if (toBeDeleted != true) {
                     (context as Element).markNeedsBuild();
                     deleteFunction != null
-                        ? deleteFunction(this)
+                        ? deleteFunction!(this)
                         : ManageItemStream.items.remove(this);
                     toBeDeleted = true;
 
-                    (context as Element).markNeedsBuild();
+                    context.markNeedsBuild();
                   } else {
                     (context as Element).markNeedsBuild();
                     deleteFunction != null
-                        ? reAddFunction(this)
+                        ? reAddFunction!(this)
                         : ManageItemStream.items.add(this);
                     toBeDeleted = false;
 
-                    (context as Element).markNeedsBuild();
+                    context.markNeedsBuild();
                   }
                 })
       ],

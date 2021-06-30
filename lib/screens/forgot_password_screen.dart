@@ -15,9 +15,9 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  bool isResetPasswordLoading;
-  String _email;
-  Future<void> _alertDialogBuilder(String title, String info) async {
+  bool? isResetPasswordLoading;
+  String? _email;
+  Future<void> _alertDialogBuilder(String title, String? info) async {
     return showDialog(
         barrierDismissible: false,
         context: context,
@@ -25,7 +25,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           return AlertDialog(
             title: Text(title != null ? title : "Error"),
             content: Container(
-              child: Text(info),
+              child: Text(info!),
             ),
             actions: [
               FlatButton(
@@ -102,7 +102,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         });
                         try {
                           await _firebaseAuth.sendPasswordResetEmail(
-                              email: _email);
+                              email: _email!);
                         } on FirebaseAuthException catch (e) {
                           setState(() {
                             isResetPasswordLoading = false;

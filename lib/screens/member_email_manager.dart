@@ -51,6 +51,7 @@ class _MemberEmailManagerState extends State<MemberEmailManager> {
                   setState(() {
                     List<ManagerItem> val = _managerStream.getNewValues();
                     val.add(ManagerItem(
+                      isNews: false,
                       hintText: 'Enter email ending',
                       prevValue: '',
                       isFromWeb: false,

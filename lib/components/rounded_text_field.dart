@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class RoundedTextField extends StatelessWidget {
-  final Color colour;
-  final String title;
-  final double radius;
-  final TextStyle textStyle;
-  final double height;
-  final double width;
-  final String hintText;
-  final Function(String) onChanged;
-  final Function(String) onSubmitted;
-  final FocusNode focusNode;
-  final TextInputAction textInputAction;
-  final bool isPasswordField;
-  final String textValue;
-  final double shadowOpacity;
-  final BoxBorder border;
-  final bool isMultiLine;
-  final bool isNumber;
-  final int maxLength;
+  final Color? colour;
+  final String? title;
+  final double? radius;
+  final TextStyle? textStyle;
+  final double? height;
+  final double? width;
+  final String? hintText;
+  final Function(String)? onChanged;
+  final Function(String)? onSubmitted;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final bool? isPasswordField;
+  final String? textValue;
+  final double? shadowOpacity;
+  final BoxBorder? border;
+  final bool? isMultiLine;
+  final bool? isNumber;
+  final int? maxLength;
 
   RoundedTextField({
     this.title,
@@ -56,14 +56,14 @@ class RoundedTextField extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: Colors.grey
-                    .withOpacity(shadowOpacity != null ? shadowOpacity : 0),
+                    .withOpacity(shadowOpacity != null ? shadowOpacity! : 0),
                 spreadRadius: 5,
                 blurRadius: 7,
                 offset: Offset(0, 3), // changes position of shadow
               ),
             ],
             color: colour != null ? colour : Colors.white,
-            borderRadius: BorderRadius.circular(radius != null ? radius : 15)),
+            borderRadius: BorderRadius.circular(radius != null ? radius! : 15)),
         child: Center(
           child: TextField(
             maxLength: maxLength,

@@ -19,7 +19,7 @@ import 'package:crypto/crypto.dart';
 import '../components/rounded_button.dart';
 
 class CreateNewsScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   CreateNewsScreen({this.data});
 
   @override
@@ -28,20 +28,20 @@ class CreateNewsScreen extends StatefulWidget {
 }
 
 class _CreateNewsScreenState extends State<CreateNewsScreen> {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   _CreateNewsScreenState({this.data});
 
   void initState() {
     if (data != null) {
       print('there is data');
       setState(() {
-        title = data['title'];
-        link = data['link'];
-        summary_text = data['summary_text'];
-        info = data['info'];
-        String dateString = data['date_time'].toString();
-        id = data['id'];
-        imageNameOnFirebase = data['image_name'];
+        title = data!['title'];
+        link = data!['link'];
+        summary_text = data!['summary_text'];
+        info = data!['info'];
+        String dateString = data!['date_time'].toString();
+        id = data!['id'];
+        imageNameOnFirebase = data!['image_name'];
         isImageSelected = true;
       });
     }
@@ -54,13 +54,13 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
       firebase_storage.FirebaseStorage.instance;
 
   bool isLoading = false;
-  String id;
+  String? id;
   //input variables
-  String title;
-  String summary_text;
-  String link = '';
-  String info;
-  int dateTimeInt;
+  String? title;
+  String? summary_text;
+  String? link = '';
+  String? info;
+  int? dateTimeInt;
   //validation
   bool isImageSelected = false;
 
@@ -71,9 +71,9 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
-  DateTime date;
-  File imageFile;
-  String imageNameOnFirebase;
+  late DateTime date;
+  File? imageFile;
+  String? imageNameOnFirebase;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -96,13 +96,13 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
     return month;
   }
 
-  List<String> seperateWords(String str) {
+  List<String> seperateWords(String? str) {
     if (str == '') {
       print('string cannot be null');
       return [''];
     }
 
-    String strCopy = str.trim();
+    String strCopy = str!.trim();
     int start = 0;
     int i = 0;
     int len = strCopy.length;
@@ -285,11 +285,12 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   }
 
   void pickImage() async {
-    InputElement uploadInput = FileUploadInputElement()..accept = 'image/*';
+    InputElement uploadInput = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
     uploadInput.click();
 
     uploadInput.onChange.listen((event) async {
-      final file = uploadInput.files.first;
+      final file = uploadInput.files!.first;
       imageSize = double.parse(file.size.toString()) / 1000;
       print(imageSize);
       if (imageSize <= 150 && file != null) {
@@ -308,7 +309,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         return;
       }
 
-      return file;
+      return;
     });
 
     return null;
@@ -317,10 +318,11 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   Future<void> uploadImage() async {
     final dateTime = DateTime.now();
     imageNameOnFirebase =
-        '${dateTime.toString()}.${imageFile.name == 'jpeg' ? 'jpg' : imageFile.name}';
+        '${dateTime.toString()}.${imageFile!.name == 'jpeg' ? 'jpg' : imageFile!.name}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
-    return ref.putBlob(imageFile.slice());
+    await ref.putBlob(imageFile!.slice());
+    return;
   }
 
   void uploadToStorage() {
@@ -370,7 +372,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
     if (title == null) {
       _alertDialogBuilder('Error', 'Title cannot be blank');
       return false;
-    } else if (title.characters.length > maxTitleChar) {
+    } else if (title!.characters.length > maxTitleChar) {
       _alertDialogBuilder(
           'Error', 'Title is too long (max $maxTitleChar characters)');
       return false;
@@ -396,7 +398,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
     if (data != null) {
       print('data != null');
       var doc = await newsFB.doc(id).get();
-      List rUsers = [];
+      List? rUsers = [];
       try {
         if (doc['registered_users'] != null) {
           rUsers = doc['registered_users'];
@@ -488,7 +490,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                           buttonText: 'Select New Image (max 150KB)',
                           title: isImageSelected == true
                               ? (imageFile != null
-                                  ? 'Image Selected (${imageFile.name})'
+                                  ? 'Image Selected (${imageFile!.name})'
                                   : 'Image Selected (${imageNameOnFirebase})')
                               : 'Image Not Selected',
                           onPressed: () async {

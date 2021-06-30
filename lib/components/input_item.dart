@@ -7,18 +7,18 @@ class InputItem extends StatelessWidget {
   final String title;
   final String hint;
   final Function(String) onChanged;
-  final bool isMultiLine;
-  final int width;
-  final double height;
-  final bool isNumber;
+  final bool? isMultiLine;
+  final int? width;
+  final double? height;
+  final bool? isNumber;
   //test
-  final int maxLength;
-  final String textValue;
+  final int? maxLength;
+  final String? textValue;
 
   InputItem({
-    @required this.title,
-    @required this.hint,
-    @required this.onChanged,
+    required this.title,
+    required this.hint,
+    required this.onChanged,
     this.maxLength,
     this.isMultiLine,
     this.width,
@@ -39,7 +39,7 @@ class InputItem extends StatelessWidget {
           height: 10,
         ),
         Container(
-          width: width != null ? width : 300,
+          width: width != null ? width as double? : 300,
           height: height != null ? height : null,
           decoration: BoxDecoration(
               color: Colors.white, borderRadius: BorderRadius.circular(15)),

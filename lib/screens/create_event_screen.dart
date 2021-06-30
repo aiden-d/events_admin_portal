@@ -16,7 +16,7 @@ import 'package:crypto/crypto.dart';
 import 'package:amcham_admin_web/components/event_item.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   CreateEventScreen({this.data});
 
   @override
@@ -25,46 +25,46 @@ class CreateEventScreen extends StatefulWidget {
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   _CreateEventScreenState({this.data});
   ItemListMaker itemListMaker = new ItemListMaker();
   void initState() {
     if (data != null) {
       print('there is data');
       setState(() {
-        title = data['title'];
-        summary = data['summary'];
-        info = data['info'];
-        type = data['type'];
-        price = data['price'];
-        category = data['category'];
-        link = data['link'];
-        youtube_link = data['youtube_link'];
-        String dateString = data['date'].toString();
+        title = data!['title'];
+        summary = data!['summary'];
+        info = data!['info'];
+        type = data!['type'];
+        price = data!['price'];
+        category = data!['category'];
+        link = data!['link'];
+        youtube_link = data!['youtube_link'];
+        String dateString = data!['date'].toString();
         int year = int.parse(dateString.substring(0, 4));
         int month = int.parse(dateString.substring(4, 6));
         int day = int.parse(dateString.substring(6, 8));
         date = DateTime(year, month, day);
         isDateSelected = true;
-        String startTimeString = data['start_time'].toString().length >= 4
-            ? data['start_time'].toString()
-            : '0' + data['start_time'].toString();
+        String startTimeString = data!['start_time'].toString().length >= 4
+            ? data!['start_time'].toString()
+            : '0' + data!['start_time'].toString();
         int startHour = int.parse(startTimeString.substring(0, 2));
         int startMin = int.parse(startTimeString.substring(2, 4));
         startTime = TimeOfDay(hour: startHour, minute: startMin);
         isStartTimeSelected = true;
-        String endTimeString = data['end_time'].toString().length >= 4
-            ? data['end_time'].toString()
-            : '0' + data['end_time'].toString();
+        String endTimeString = data!['end_time'].toString().length >= 4
+            ? data!['end_time'].toString()
+            : '0' + data!['end_time'].toString();
         int endHour = int.parse(endTimeString.substring(0, 2));
         int endMin = int.parse(endTimeString.substring(2, 4));
         endTime = TimeOfDay(hour: endHour, minute: endMin);
         isEndTimeSelected = true;
-        isMembersOnly = data['isMembersOnly'];
-        id = data['id'];
-        imageNameOnFirebase = data['image_name'];
+        isMembersOnly = data!['isMembersOnly'];
+        id = data!['id'];
+        imageNameOnFirebase = data!['image_name'];
         isImageSelected = true;
-        speakers = data['speakers'];
+        speakers = List<String>.from(data!['speakers']);
       });
       print(title);
     }
@@ -78,21 +78,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   //
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
-  bool isMembersOnly = false;
+  bool? isMembersOnly = false;
 
   bool isLoading = false;
-  String id;
+  String? id;
   //input variables
-  String title;
-  String summary;
-  String info;
-  String type = 'Livestream';
-  String archetype = "MS Teams";
-  int price = 0;
-  String category = 'General';
-  String link;
-  String youtube_link = '';
-  List speakers;
+  String? title;
+  String? summary;
+  String? info;
+  String? type = 'Livestream';
+  String? archetype = "MS Teams";
+  int? price = 0;
+  String? category = 'General';
+  String? link;
+  String? youtube_link = '';
+  List<String> speakers = [];
 
   //validation
   bool isImageSelected = false;
@@ -106,11 +106,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
-  DateTime date;
-  TimeOfDay startTime;
-  TimeOfDay endTime;
-  File imageFile;
-  String imageNameOnFirebase;
+  DateTime? date;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  File? imageFile;
+  String? imageNameOnFirebase;
   //BlobImage blobImage;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -134,13 +134,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return month;
   }
 
-  List<String> seperateWords(String str) {
+  List<String> seperateWords(String? str) {
     if (str == '') {
       print('string cannot be null');
       return [''];
     }
 
-    String strCopy = str.trim();
+    String strCopy = str!.trim();
     int start = 0;
     int i = 0;
     int len = strCopy.length;
@@ -170,18 +170,18 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       tier1Hashes.add(generateSimpleHash(s.toLowerCase()));
     }
 //Tier 2
-    List<String> tier2words = [];
+    List<String?> tier2words = [];
     tier2words.add(category);
     tier2words.add(type);
-    tier2words.add(monthToString(date.month));
-    tier2words.add(date.day.toString());
-    tier2words.add(date.year.toString());
+    tier2words.add(monthToString(date!.month));
+    tier2words.add(date!.day.toString());
+    tier2words.add(date!.year.toString());
     //TODO add speakers
-    for (String s in tier2words) {
+    for (String? s in tier2words) {
       if (s == 'Livestream') {
-        print('livestream ==== ${generateSimpleHash(s.toLowerCase())}');
+        print('livestream ==== ${generateSimpleHash(s!.toLowerCase())}');
       }
-      tier2Hashes.add(generateSimpleHash(s.toLowerCase()));
+      tier2Hashes.add(generateSimpleHash(s!.toLowerCase()));
       //TODO delete below
 
     }
@@ -325,12 +325,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   void pickImage() async {
-    InputElement uploadInput = FileUploadInputElement()..accept = 'image/*';
+    InputElement uploadInput = FileUploadInputElement() as InputElement
+      ..accept = 'image/*';
     uploadInput.click();
 
     uploadInput.onChange.listen((event) async {
-      final file = uploadInput.files.first;
-      print("dir = " + uploadInput.dirName);
+      final file = uploadInput.files!.first;
+      print("dir = " + uploadInput.dirName!);
       imageSize = double.parse(file.size.toString()) / 1000;
       print(imageSize);
       if (imageSize <= 150 && file != null) {
@@ -352,7 +353,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         //blobImage = new BlobImage(file, name: file.name);
       });
 
-      return file;
+      return;
     });
 
     return null;
@@ -361,10 +362,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Future<void> uploadImage() async {
     final dateTime = DateTime.now();
     imageNameOnFirebase =
-        '${dateTime.toString()}.${imageFile.name == 'jpeg' ? 'jpg' : imageFile.name}';
+        '${dateTime.toString()}.${imageFile!.name == 'jpeg' ? 'jpg' : imageFile!.name}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
-    return ref.putBlob(imageFile.slice());
+    await ref.putBlob(imageFile!.slice());
+    return;
   }
 
   void uploadToStorage() {
@@ -393,15 +395,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   int getDateTimeInt() {
-    int val = int.parse(date.year.toString() +
-        (date.month > 9 ? date.month.toString() : '0' + date.month.toString()) +
-        (date.day > 9 ? date.day.toString() : '0' + date.day.toString()) +
-        (endTime.hour > 9
-            ? endTime.hour.toString()
-            : '0' + endTime.hour.toString()) +
-        (endTime.minute > 9
-            ? endTime.minute.toString()
-            : '0' + endTime.minute.toString()));
+    int val = int.parse(date!.year.toString() +
+        (date!.month > 9
+            ? date!.month.toString()
+            : '0' + date!.month.toString()) +
+        (date!.day > 9 ? date!.day.toString() : '0' + date!.day.toString()) +
+        (endTime!.hour > 9
+            ? endTime!.hour.toString()
+            : '0' + endTime!.hour.toString()) +
+        (endTime!.minute > 9
+            ? endTime!.minute.toString()
+            : '0' + endTime!.minute.toString()));
     return val;
   }
 
@@ -426,7 +430,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (title == null) {
       _alertDialogBuilder('Error', 'Title cannot be blank');
       return false;
-    } else if (title.characters.length > maxTitleChar) {
+    } else if (title!.characters.length > maxTitleChar) {
       _alertDialogBuilder(
           'Error', 'Title is too long (max $maxTitleChar characters)');
       return false;
@@ -444,8 +448,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Link cannot be blank');
       return false;
     }
-    if (link.substring(0, 8) != 'https://' &&
-        link.substring(0, 7) != 'http://' &&
+    if (link!.substring(0, 8) != 'https://' &&
+        link!.substring(0, 7) != 'http://' &&
         archetype != "Youtube") {
       _alertDialogBuilder('Error', 'Link must contain https:// or http://');
       return false;
@@ -459,8 +463,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return false;
     }
     if (archetype == "Youtube" && youtube_link != null && youtube_link != '') {
-      if (youtube_link.substring(0, 8) != 'https://' &&
-          youtube_link.substring(0, 7) != 'http://') {
+      if (youtube_link!.substring(0, 8) != 'https://' &&
+          youtube_link!.substring(0, 7) != 'http://') {
         _alertDialogBuilder(
             'Error', 'Past Link must contain https:// or http://');
         return false;
@@ -490,7 +494,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (title == null) {
       _alertDialogBuilder('Error', 'Title cannot be blank');
       return false;
-    } else if (title.characters.length > maxTitleChar) {
+    } else if (title!.characters.length > maxTitleChar) {
       _alertDialogBuilder(
           'Error', 'Title is too long (max $maxTitleChar characters)');
       return false;
@@ -504,12 +508,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _alertDialogBuilder('Error', 'Price cannot be blank');
       return false;
     }
-    if (link == null) {
+    if (link == null && archetype != "Youtube") {
       _alertDialogBuilder('Error', 'Link cannot be blank');
       return false;
     }
-    if (link.substring(0, 8) != 'https://' &&
-        link.substring(0, 7) != 'http://') {
+    if (link!.substring(0, 8) != 'https://' &&
+        link!.substring(0, 7) != 'http://') {
       _alertDialogBuilder('Error', 'Link must contain https:// or http://');
       return false;
     }
@@ -518,8 +522,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return false;
     }
     if (youtube_link != null && youtube_link != '') {
-      if (youtube_link.substring(0, 8) != 'https://' &&
-          youtube_link.substring(0, 7) != 'http://') {
+      if (youtube_link!.substring(0, 8) != 'https://' &&
+          youtube_link!.substring(0, 7) != 'http://') {
         _alertDialogBuilder(
             'Error', 'Past Link must contain https:// or http://');
         return false;
@@ -539,15 +543,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         FirebaseFirestore.instance.collection('Events');
 
     int dateInt = getDateTimeInt();
-    int endTimeInt = getTimeInt(endTime);
-    int startTimeInt = getTimeInt(startTime);
+    int endTimeInt = getTimeInt(endTime!);
+    int startTimeInt = getTimeInt(startTime!);
 
     List<List<int>> hashes = GenerateHashes();
     //upload to firebase
     if (data != null) {
       print('data != null');
       var doc = await eventsFB.doc(id).get();
-      List rUsers = [];
+      List? rUsers = [];
       try {
         if (doc['registered_users'] != null) {
           rUsers = doc['registered_users'];
@@ -657,7 +661,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                   height: 2,
                                   color: Colors.black,
                                 ),
-                                onChanged: (String newValue) {
+                                onChanged: (String? newValue) {
                                   setState(() {
                                     archetype = newValue;
                                     if (archetype != "Paid Event") {
@@ -721,7 +725,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                   height: 2,
                                   color: Colors.black,
                                 ),
-                                onChanged: (String newValue) {
+                                onChanged: (String? newValue) {
                                   setState(() {
                                     type = newValue;
                                   });
@@ -770,7 +774,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                   height: 2,
                                   color: Colors.black,
                                 ),
-                                onChanged: (String newValue) {
+                                onChanged: (String? newValue) {
                                   setState(() {
                                     category = newValue;
                                   });
@@ -827,7 +831,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           buttonText: 'Select New Image (max 150KB)',
                           title: isImageSelected == true
                               ? (imageFile != null
-                                  ? 'Image Selected (${imageFile.name})'
+                                  ? 'Image Selected (${imageFile!.name})'
                                   : 'Image Selected (${imageNameOnFirebase})')
                               : 'Image Not Selected',
                           onPressed: () async {
@@ -837,14 +841,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         SelectItem(
                           isNoError: isDateSelected,
                           title: isDateSelected == true
-                              ? 'Date Selected (${date.day < 10 ? '0' + date.day.toString() : date.day}-${date.month < 10 ? "0" + date.month.toString() : date.month}-${date.year})'
+                              ? 'Date Selected (${date!.day < 10 ? '0' + date!.day.toString() : date!.day}-${date!.month < 10 ? "0" + date!.month.toString() : date!.month}-${date!.year})'
                               : 'Date Not Selected',
                           buttonText: 'Select New Date',
                           onPressed: () async {
-                            DateTime tempDate = await showDatePicker(
+                            DateTime? tempDate = await showDatePicker(
                                 context: context,
                                 initialDate:
-                                    date != null ? date : DateTime.now(),
+                                    date != null ? date! : DateTime.now(),
                                 firstDate: DateTime(1999),
                                 lastDate: DateTime(2999));
                             setState(() {
@@ -858,14 +862,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         SelectItem(
                           isNoError: isStartTimeSelected,
                           title: isStartTimeSelected == true
-                              ? 'Start Time Selected (${startTime.hour < 10 ? '0' + startTime.hour.toString() : startTime.hour}:${startTime.minute < 10 ? '0' + startTime.minute.toString() : startTime.minute.toString()})'
+                              ? 'Start Time Selected (${startTime!.hour < 10 ? '0' + startTime!.hour.toString() : startTime!.hour}:${startTime!.minute < 10 ? '0' + startTime!.minute.toString() : startTime!.minute.toString()})'
                               : 'Start Time Not Selected',
                           buttonText: 'Select New Time',
                           onPressed: () async {
-                            TimeOfDay tempTime = await showTimePicker(
+                            TimeOfDay? tempTime = await showTimePicker(
                               context: context,
                               initialTime: startTime != null
-                                  ? startTime
+                                  ? startTime!
                                   : TimeOfDay.now(),
                             );
                             setState(() {
@@ -879,14 +883,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         SelectItem(
                           isNoError: isEndTimeSelected,
                           title: isEndTimeSelected == true
-                              ? 'End Time Selected (${endTime.hour < 10 ? '0' + endTime.hour.toString() : endTime.hour}:${endTime.minute < 10 ? '0' + endTime.minute.toString() : endTime.minute.toString()})'
+                              ? 'End Time Selected (${endTime!.hour < 10 ? '0' + endTime!.hour.toString() : endTime!.hour}:${endTime!.minute < 10 ? '0' + endTime!.minute.toString() : endTime!.minute.toString()})'
                               : 'End Time Not Selected',
                           buttonText: 'Select New Time',
                           onPressed: () async {
-                            TimeOfDay tempTime = await showTimePicker(
+                            TimeOfDay? tempTime = await showTimePicker(
                               context: context,
                               initialTime:
-                                  endTime != null ? endTime : TimeOfDay.now(),
+                                  endTime != null ? endTime! : TimeOfDay.now(),
                             );
                             setState(() {
                               endTime = tempTime;
@@ -1109,7 +1113,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             return;
                           }
                           EventItem item = new EventItem(
-                            startTime: getTimeInt(startTime),
+                            startTime: getTimeInt(startTime!),
                             youtube_link: youtube_link,
                             price: price,
                             date: getDateTimeInt(),
@@ -1123,7 +1127,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             speakers: itemListMaker.getAsListString(),
                             id: id,
                             link: link,
-                            endTime: getTimeInt(endTime),
+                            endTime: getTimeInt(endTime!),
                             //blobImage: blobImage,
                             archetype: archetype,
                           );
@@ -1148,7 +1152,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
 class ItemListMaker extends StatelessWidget {
   ItemListMaker({this.passedItemsNames});
-  final List passedItemsNames;
+  final List? passedItemsNames;
   List<Item> items = [];
   bool removeItem(Item item) {
     bool b = items.remove(item);
@@ -1163,7 +1167,7 @@ class ItemListMaker extends StatelessWidget {
         title: '',
       ));
     } else {
-      for (String str in passedItemsNames) {
+      for (String str in passedItemsNames as List<String>) {
         items.add(Item(
           title: str,
           listMaker: this,
@@ -1181,8 +1185,8 @@ class ItemListMaker extends StatelessWidget {
     }
   }
 
-  List<String> getAsListString() {
-    List<String> list = [];
+  List<String?> getAsListString() {
+    List<String?> list = [];
     for (Item i in items) {
       if (i.title != null && i.title != '') {
         list.add(i.title);
@@ -1218,9 +1222,9 @@ class ItemListMaker extends StatelessWidget {
 }
 
 class Item extends StatelessWidget {
-  String title;
+  String? title;
   bool isDeleted = false;
-  final ItemListMaker listMaker;
+  final ItemListMaker? listMaker;
   Item({this.title, this.listMaker});
 
   @override
@@ -1246,10 +1250,10 @@ class Item extends StatelessWidget {
                       onPressed: () {
                         print('pressed');
                         print(this.toString());
-                        if (listMaker.items.length <= 1) {
+                        if (listMaker!.items.length <= 1) {
                           title = '';
                         } else {
-                          listMaker.items.remove(this);
+                          listMaker!.items.remove(this);
                           isDeleted = true;
                         }
 

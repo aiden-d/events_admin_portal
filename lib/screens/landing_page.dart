@@ -23,11 +23,11 @@ class LandingPage extends StatelessWidget {
             );
           }
           if (snapshot.connectionState == ConnectionState.done) {
-            return StreamBuilder(
+            return StreamBuilder<User?>(
                 stream: FirebaseAuth.instance.authStateChanges(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.active) {
-                    User _user = snapshot.data;
+                    User? _user = snapshot.data;
                     SizeConfig().init(context);
                     if (_user == null) {
                       print('need to log in');
@@ -37,7 +37,7 @@ class LandingPage extends StatelessWidget {
                       print('logged in');
                       return ChooserScreen();
                       //user is logged in
-                      return null;//EventsScreen();
+                      //EventsScreen();
                     }
                   }
                   return Scaffold(
