@@ -1,17 +1,20 @@
+import 'package:amcham_admin_web/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:amcham_admin_web/constants.dart';
-
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webviewx/webviewx.dart';
 import 'get_firebase_image.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:web_browser/web_browser.dart';
 
-class EventItem extends StatelessWidget {
+class EventItem extends StatefulWidget {
   final int? price;
   //date must be formated as year/month/day
-  final int date;
+  final int? date;
   //time formatted as hhmm or hour hour minute minute
-  final int startTime;
-  final int endTime;
+  final int? startTime;
+  final int? endTime;
   final String? title;
   final String? type;
   final String? category;
@@ -19,22 +22,14 @@ class EventItem extends StatelessWidget {
   final String? summary;
   final String? imageRef;
   final String? info;
-  final String? id;
+  final String id;
   final String? link;
   final String? youtube_link;
-  final List speakers;
-  final Image? image;
-  //final BlobImage blobImage;
+  final List? speakers;
   final String? archetype;
-  bool? isButton;
-  bool? showInfo;
-  bool? hideSummary;
-  bool isInfoSelected = true;
-  Function? infoButtonFunction;
-  Function? speakersButtonFunction;
+  final Image? image;
 
   EventItem({
-    required this.archetype,
     required this.price,
     required this.date,
     required this.title,
@@ -50,14 +45,40 @@ class EventItem extends StatelessWidget {
     required this.endTime,
     required this.speakers,
     required this.youtube_link,
+    required this.archetype,
     required this.image,
-    //@required this.blobImage,
   });
   int? rankedPoints;
-  YoutubePlayerController? _controller;
+  bool showVid = true;
+  bool? isButton;
 
-  //date must be formated as year/month/day
-  String DateToString(int numberDate) {
+  bool? showInfo;
+
+  bool? hideSummary;
+
+  bool isInfoSelected = true;
+  int getDateTimeInt() {
+    int val = int.parse(date.toString());
+    print('int date time = ' + val.toString());
+    return val;
+  }
+
+  int getCurrentDateTimeInt() {
+    DateTime now = DateTime.now();
+    int val = int.parse(now.year.toString() +
+        (now.month > 9 ? now.month.toString() : '0' + now.month.toString()) +
+        (now.day > 9 ? now.day.toString() : '0' + now.day.toString()) +
+        (now.hour > 9 ? now.hour.toString() : '0' + now.hour.toString()) +
+        (now.minute > 9 ? now.minute.toString() : '0' + now.minute.toString()));
+    print('current int date time = $val');
+    return val;
+  }
+
+  Function? infoButtonFunction;
+
+  Function? speakersButtonFunction;
+
+  String DateToString(int? numberDate) {
     String strNumberDate = numberDate.toString();
     String year = strNumberDate.substring(0, 4);
     String month = strNumberDate.substring(4, 6);
@@ -82,7 +103,7 @@ class EventItem extends StatelessWidget {
     return '$day $month $year';
   }
 
-  String TimeToString(int numberTime) {
+  String TimeToString(int? numberTime) {
     String numberStr = numberTime.toString();
     if (numberStr.length < 4) {
       numberStr = '0' + numberStr;
@@ -93,9 +114,28 @@ class EventItem extends StatelessWidget {
   }
 
   @override
+  _EventItemState createState() => _EventItemState();
+}
+
+class _EventItemState extends State<EventItem> {
+  late WebViewXController webviewController;
+  String yID = "QRWijH8KNFU";
+
+  @override
+  void initState() {
+    print(widget.archetype);
+    if (widget.archetype == "Youtube" && widget.showVid == true) {
+      yID = YoutubePlayer.convertUrlToId(widget.youtube_link!)!;
+    } else
+      print("no vid");
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialButton(
-      onPressed: isButton == false ? null : () {},
+      onPressed: () {},
       padding: EdgeInsets.symmetric(vertical: 10),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -109,20 +149,23 @@ class EventItem extends StatelessWidget {
                   children: [
                     Icon(CupertinoIcons.calendar),
                     SizedBox(
-                      width: 10,
+                      width: 7,
                     ),
                     Text(
-                      '${DateToString(this.date)} ${TimeToString(this.startTime)}',
-                      style: TextStyle(fontSize: 16),
+                      '${widget.DateToString(this.widget.date)} ${widget.TimeToString(this.widget.startTime)}',
+                      style: TextStyle(fontSize: 14),
                     )
                   ],
                 ),
                 Text(
-                  (price == 0 || price == null ? 'FREE' : 'R$price'),
-                  style: TextStyle(color: Colors.red[900], fontSize: 14),
+                  (widget.price == 0 || widget.price == null
+                      ? 'FREE'
+                      : 'R${widget.price}'),
+                  style: TextStyle(color: Colors.red[900], fontSize: 12),
                 ),
               ],
             ),
+
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 3),
               child: Row(
@@ -130,13 +173,20 @@ class EventItem extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      title!,
-                      style: Constants.regularHeading
-                          .copyWith(fontSize: title!.length > 25 ? 16 : 19),
+                      widget.title!,
+                      style: Constants.regularHeading.copyWith(
+                          fontSize: widget.title!.length > 25 ? 16 : 19),
                     ),
                   ),
                   Text(
-                    type!,
+                    widget.archetype != "External Event"
+                        ? widget.archetype == "Youtube"
+                            ? widget.getDateTimeInt() <
+                                    widget.getCurrentDateTimeInt()
+                                ? "Recording"
+                                : "Livestream"
+                            : widget.archetype!
+                        : widget.type!,
                     style: TextStyle(
                         color: Constants.blueThemeColor, fontSize: 16),
                   ),
@@ -149,35 +199,83 @@ class EventItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    category!,
+                    widget.category!,
                     style: TextStyle(
                         color: Constants.blueThemeColor, fontSize: 16),
                   ),
                   Text(
-                    isMembersOnly == true ? 'Members Only' : 'Public',
+                    widget.isMembersOnly == true ? 'Members Only' : 'Public',
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
               ),
             ),
-            archetype == "Youtube"
-                ? YoutubePlayerIFrame(
-                    controller: YoutubePlayerController(
-                      initialVideoId:
-                          youtube_link!.substring(32, youtube_link!.length),
-                      params: YoutubePlayerParams(
-                        showControls: true,
-                        showFullscreenButton: true,
-                      ),
-                    ),
-                    aspectRatio: 16 / 9,
-                  )
-                : Padding(
+
+            //TODO put container here
+            widget.archetype == "Youtube" && widget.showVid == true
+                ? Container(
+                    width: 450,
+                    height: 450 * 9 / 16,
+                    child: WebBrowser(
+                      initialUrl: "https://www.youtube.com/embed/" + yID,
+                      javascriptEnabled: true,
+                      interactionSettings: WebBrowserInteractionSettings(
+                          bottomBar: SizedBox(), topBar: SizedBox()),
+                    ))
+                // WebViewX(
+                //     initialContent: '<h2> Loading... </h2>',
+                //     initialSourceType: SourceType.url,
+                //     width: 450,
+                //     height: 450 * 9 / 16,
+                //     onWebViewCreated: (controller) {
+                //       webviewController = controller;
+                //       webviewController.loadContent(
+                //         "https://www.youtube.com/embed/" + yID,
+                //         SourceType.url,
+                //       );
+                //     },
+                //   )
+
+                // onWebViewCreated: (controller) {
+                //   webViewController = controller;
+                // },
+                // YoutubePlayerBuilder(
+                //     player: YoutubePlayer(
+                //       controller: widget._controller,
+                //       showVideoProgressIndicator: true,
+                //     ),
+                //     builder: (context, player) {
+                //       return Column(
+                //         children: [
+                //           // some widgets
+                //           player,
+                //           //some other widgets
+                //         ],
+                //       );
+                //     })
+                :
+                //     :
+
+                //     ? YoutubePlayerIFrame(
+                //         controller: _controller,
+                //         // YoutubePlayerController(
+                //         //   initialVideoId:
+                //         //       youtube_link.substring(32, youtube_link.length),
+                //         //   params: YoutubePlayerParams(
+                //         //     autoPlay: false,
+                //         //     showControls: true,
+                //         //     showFullscreenButton: true,
+                //         //   ),
+                //         // ),
+                //         aspectRatio: 16 / 9,
+                //       )
+                //     :
+                Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
-                    child: image != null
-                        ? image
-                        : LoadFirebaseStorageImage(imageRef: imageRef)),
-            hideSummary == true ? SizedBox() : Text(summary!),
+                    child: widget.image != null
+                        ? widget.image
+                        : LoadFirebaseStorageImage(imageRef: widget.imageRef)),
+            widget.hideSummary == true ? SizedBox() : Text(widget.summary!),
 
             //showInfo == true ? Text(info) : SizedBox(),
           ],

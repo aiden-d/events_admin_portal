@@ -18,6 +18,12 @@ import 'package:crypto/crypto.dart';
 import 'package:amcham_admin_web/components/event_item.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
+import 'package:image_compression/image_compression.dart' as _compress;
+import 'dart:math';
+import 'package:image/image.dart' as img;
+import 'dart:convert';
+import 'dart:io' as IO;
+import 'dart:ui' as ui;
 
 class CreateEventScreen extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -44,6 +50,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         category = data!['category'];
         link = data!['link'];
         youtube_link = data!['youtube_link'];
+        if (data!['archetype'] != null) {
+          archetype = data!['archetype'];
+        }
         String dateString = data!['date'].toString();
         int year = int.parse(dateString.substring(0, 4));
         int month = int.parse(dateString.substring(4, 6));
@@ -86,6 +95,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   bool isLoading = false;
   String? id;
+  bool isImageChanged = false;
+
   //input variables
   String? title;
   String? summary;
@@ -93,6 +104,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String? type = 'Livestream';
   String? archetype = "MS Teams";
   int? price = 0;
+  int? maxParticipants = 20;
   String? category = 'General';
   String? link = '';
   String? youtube_link = '';
@@ -104,9 +116,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   bool isStartTimeSelected = false;
   bool isEndTimeSelected = false;
   //TODO
-
+  Uint8List? imageData;
   //
-  int maxTitleChar = 30;
+  int maxTitleChar = 80;
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
@@ -332,25 +344,33 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   void pickImage() async {
     final _picker = ImagePicker();
-    PickedFile? pickedFile =
-        await _picker.getImage(source: ImageSource.gallery) as PickedFile;
-    pickedImageFile = pickedFile;
-    image = Image.network(pickedFile.path);
-    Uint8List imageData = await pickedFile.readAsBytes();
-    imageSize = imageData.lengthInBytes / 1000;
 
-    if (imageSize <= 150 && pickedFile != null) {
+    PickedFile? pickedFile = await _picker.getImage(
+        source: ImageSource.gallery,
+        maxWidth: 640,
+        maxHeight: 480,
+        imageQuality: 65) as PickedFile;
+
+    if (pickedFile != null) {
+      imageData = await pickedFile.readAsBytes();
+      imageSize = imageData!.lengthInBytes / 1000;
+      pickedImageFile = pickedFile;
       setState(() {
-        image = Image.network(pickedFile.path);
+        image = Image.network(pickedFile.path, width: 640, height: 480);
+
+        //image = Image.network(pickedFile.path);
         print("path=" + pickedFile.path);
         isImageSelected = true;
+        isImageChanged = true;
       });
-      await uploadImage(pickedFile);
+      //await uploadImage(pickedFile);
       return;
-    } else if (imageSize > 150) {
-      return _alertDialogBuilder('Image too large',
-          'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
-    } else {
+    }
+    // else if (imageSize > 150) {
+    //   return _alertDialogBuilder('Image too large',
+    //       'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    // }
+    else {
       print('error with picker');
       return;
     }
@@ -386,15 +406,72 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<void> uploadImage(PickedFile? pickedFile) async {
-    print("Basename = " + Path.basename(pickedFile!.path));
+    //final file = pickedImageFile;
+
+    //var imageData = await file!.readAsBytes();
+    //var imageSize = imageData.lengthInBytes;
+    print("imageSize = " + imageSize.toString());
+
+    //ImageFile imageFile =
+    //    new ImageFile(filePath: file.path, rawBytes: imageData);
+    // print("Basename = " + Path.basename(pickedFile!.path));
+    // if (imageSize > 150 * 1000) {
+    //   var input = imageFile;
+    //   var quality = 10;
+
+    //   final output = await compressInQueue(ImageFileConfiguration(
+    //       input: input,
+    //       config: Configuration(
+    //           pngCompression: PngCompression.bestSpeed,
+    //           jpgQuality: quality,
+    //           animationGifSamplingFactor: 30)));
+    //   imageFile = output;
+    //   imageSize = imageFile.sizeInBytes;
+
+    //   print("Size = " + imageSize.toString());
+    // }
+    // imageData = imageFile.rawBytes;
+
+    // double width = image!.width!;
+    // double height = image!.height!;
+    // double ratio = height / width;
+    // var newSize = 150000;
+    // var newPixels = (width * height * (newSize / imageSize)).toInt();
+    // var pixels = width * height;
+    // print("current pixels = {$pixels}");
+    // print("Target pixels = {$newPixels}");
+    // var newWidth = sqrt((newPixels) / (ratio)).toInt();
+    // print("width = ${width}");
+    // print("new width = " + newWidth.toString());
+    // var im = img.decodeImage(imageData!);
+    // var newImg = img.copyResize(im!,
+    //     width: 500,
+    //     //height: (newWidth * ratio).toInt(),
+    //     interpolation: img.Interpolation.average);
+    // var imgBytes = newImg.getBytes();
+    // //ImageFile()
+    // print("new bytes = " + imgBytes.length.toString());
+    // // //return;
+
+    // var resizeImage = ResizeImage(MemoryImage(imageData),
+    //     width: newWidth.toInt(), height: (newWidth * ratio).toInt());
+
+    // ui.Image image = new ui.Image(
+    //   image: resizeImage,
+    // );
+
     final dateTime = DateTime.now();
-    imageNameOnFirebase = "${dateTime.toString()}.jpeg";
+    //final imgBytes = await file!.readAsBytes();
+    final name = dateTime.toString();
+    imageNameOnFirebase = "${name}.jpeg";
+
+    //print(' size = ${imgBytes.length}');
 
     //imageNameOnFirebase = '${Path.basename(pickedFile.path)}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
     print("made it to put");
-    Uint8List data = await pickedFile.readAsBytes();
+    Uint8List data = imageData!;
 
     try {
       await ref
@@ -410,6 +487,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     } catch (e) {
       print(e);
     }
+    imageNameOnFirebase = name + "_640x480.jpeg";
 
     // try {
     //   await ref.put(_data);
@@ -504,12 +582,29 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         _alertDialogBuilder('Error', 'Link cannot be blank');
         return false;
       }
-      if (archetype != "Youtube") {
-        if (link!.substring(0, 8) != 'https://' &&
-            link!.substring(0, 7) != 'http://') {
-          _alertDialogBuilder('Error', 'Link must contain https:// or http://');
-          return false;
+
+      try {
+        if (archetype == "Youtube") {
+          print(youtube_link!.substring(0, 8));
+          if (youtube_link!.substring(0, 8) != 'https://' &&
+              youtube_link!.substring(0, 7) != 'http://') {
+            _alertDialogBuilder(
+                'Error', 'Link must contain https:// or http://');
+            print("ii");
+            return false;
+          }
+        } else {
+          if (link!.substring(0, 8) != 'https://' &&
+              link!.substring(0, 7) != 'http://') {
+            _alertDialogBuilder(
+                'Error', 'Link must contain https:// or http://');
+            return false;
+          }
         }
+      } catch (e) {
+        print("i");
+        _alertDialogBuilder('Error', 'Link must contain https:// or http://');
+        return false;
       }
 
       if (summary == null) {
@@ -519,16 +614,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       if (youtube_link == null && archetype == "Youtube") {
         _alertDialogBuilder('Error', 'Link cannot be blank');
         return false;
-      }
-      if (archetype == "Youtube" &&
-          youtube_link != null &&
-          youtube_link != '') {
-        if (youtube_link!.substring(0, 8) != 'https://' &&
-            youtube_link!.substring(0, 7) != 'http://') {
-          _alertDialogBuilder(
-              'Error', 'Past Link must contain https:// or http://');
-          return false;
-        }
       }
 
       if (info == null) {
@@ -552,11 +637,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return false;
     }
     try {
-      if (imageNameOnFirebase != null && data != null) {
-        print('image already on firebase ');
-      } else {
+      if (isImageChanged) {
         await uploadImage(pickedImageFile!);
       }
+
       CollectionReference eventsFB =
           FirebaseFirestore.instance.collection('Events');
 
@@ -687,15 +771,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                 onChanged: (String? newValue) {
                                   setState(() {
                                     archetype = newValue;
-                                    if (archetype != "Paid Event") {
+                                    if (archetype != "External Event") {
                                       price = 0;
                                     }
+                                    if (archetype == "MS Teams" ||
+                                        archetype == "Physical Event")
+                                      isMembersOnly = true;
+                                    else
+                                      isMembersOnly = false;
                                   });
                                 },
                                 items: <String>[
                                   'MS Teams',
                                   'Youtube',
-                                  'Paid Event',
+                                  'External Event',
+                                  // 'Physical Event',
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
@@ -722,51 +812,56 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         SizedBox(
                           width: 30,
                         ),
+                        archetype == "External Event"
+                            ? Column(
+                                children: [
+                                  Text(
+                                    'Event Type',
+                                    style: Constants.logoTitleStyle,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 15),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: Colors.white,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      value: type,
+                                      icon: Icon(Icons.arrow_downward),
+                                      iconSize: 24,
+                                      elevation: 16,
+                                      style: TextStyle(color: Colors.black),
+                                      underline: Container(
+                                        height: 2,
+                                        color: Colors.black,
+                                      ),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          type = newValue;
+                                        });
+                                      },
+                                      items: <String>[
+                                        'Livestream',
+                                        'Virtual Conference',
+                                        'Physical Event',
+                                      ].map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : SizedBox(),
                         Column(
-                          children: [
-                            Text(
-                              'Event Type',
-                              style: Constants.logoTitleStyle,
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 15),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.white,
-                              ),
-                              child: DropdownButton<String>(
-                                value: type,
-                                icon: Icon(Icons.arrow_downward),
-                                iconSize: 24,
-                                elevation: 16,
-                                style: TextStyle(color: Colors.black),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.black,
-                                ),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    type = newValue;
-                                  });
-                                },
-                                items: <String>[
-                                  'Livestream',
-                                  'Virtual Conference',
-                                  'Physical Event',
-                                  'MS Teams',
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
+                          children: [],
                         ),
                         SizedBox(
                           width: 30,
@@ -851,7 +946,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         SelectItem(
                           width: 100,
                           isNoError: isImageSelected,
-                          buttonText: 'Select New Image (max 150KB)',
+                          buttonText: 'Select New Image',
                           title: isImageSelected == true
                               ? (imageFile != null
                                   ? 'Image Selected'
@@ -1093,18 +1188,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Members Only? ',
-                        style: Constants.logoTitleStyle,
-                      ),
-                      Checkbox(
-                        value: isMembersOnly,
-                        onChanged: (value) {
-                          setState(() {
-                            isMembersOnly = value;
-                          });
-                        },
-                      ),
+                      archetype == "Youtube"
+                          ? SizedBox()
+                          : Text(
+                              'Members Only? ',
+                              style: Constants.logoTitleStyle,
+                            ),
+                      archetype == "Youtube"
+                          ? SizedBox()
+                          : Checkbox(
+                              value: isMembersOnly,
+                              onChanged: (value) {
+                                setState(() {
+                                  isMembersOnly = value;
+                                });
+                              },
+                            ),
                       SizedBox(
                         width: 20,
                       ),
@@ -1127,7 +1226,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             print("all good statement");
                             await _alertDialogBuilder('Finished',
                                 'Your event has been uploaded and should now appear on the app.');
-                            Navigator.pop(context);
+                            Navigator.popAndPushNamed(context, '/manageevents');
                           }
                         },
                       ),
@@ -1157,13 +1256,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               imageRef: imageNameOnFirebase,
                               info: info,
                               speakers: itemListMaker.getAsListString(),
-                              id: id,
+                              id: id!,
                               link: link,
                               endTime: getTimeInt(endTime!),
                               //blobImage: blobImage,
                               archetype: archetype,
                               image: image,
                             );
+                            // if (archetype == "Youtube") {
+                            //   return _alertDialogBuilder("Error",
+                            //       "Preview function not available for Youtube events yet!");
+                            // }
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(

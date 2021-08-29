@@ -92,6 +92,10 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
     return val;
   }
 
+  bool checkOwnedEvent() {
+    return false;
+  }
+
   int getCurrentDateTimeInt() {
     DateTime now = DateTime.now();
     int val = int.parse(now.year.toString() +
@@ -171,12 +175,17 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
               //TODO validate whether user has pruchased this item and then write 'owned'
               alignment: Alignment.bottomCenter,
               child: RoundedButton(
-                title: (getDateTimeInt() < getCurrentDateTimeInt() &&
-                        item.archetype == "MS Teams")
-                    ? 'Not Available Yet'
-                    : item.price == 0
-                        ? 'Register: FREE'
-                        : 'Register: R${item.price}',
+                title: item.archetype == "Youtube"
+                    ? checkOwnedEvent() == true
+                        ? "Open Livesteam Link"
+                        : "Add To Calendar"
+                    : item.archetype == "MS Teams"
+                        ? (getDateTimeInt() < getCurrentDateTimeInt())
+                            ? 'Recording Not Available'
+                            : checkOwnedEvent() == true
+                                ? 'Open Teams Link'
+                                : 'Sign Up for Teams Event'
+                        : "Open Link to Event",
                 onPressed: () {},
                 radius: 10,
                 width: 350,

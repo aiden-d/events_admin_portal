@@ -64,7 +64,8 @@ class ManageItemStream extends StatelessWidget {
 
               if (snapshot.connectionState == ConnectionState.done) {
                 items = [];
-                Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+                Map<String, dynamic> data =
+                    snapshot.data!.data() as Map<String, dynamic>;
                 List? variableData;
                 try {
                   variableData = data[variableName!];
@@ -81,7 +82,7 @@ class ManageItemStream extends StatelessWidget {
                 }
                 isDataNull = false;
 
-                for (String e in variableData as Iterable<String>) {
+                for (String e in variableData) {
                   items.add(ManagerItem(
                     shouldBeTextField: shouldBeTextField,
                     deleteFunction: deleteFunction,
@@ -118,7 +119,8 @@ class ManageItemStream extends StatelessWidget {
 
               if (snapshot.connectionState == ConnectionState.done) {
                 for (var doc in snapshot.data!.docs) {
-                  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                  Map<String, dynamic> data =
+                      doc.data() as Map<String, dynamic>;
                   String? title = data[variableName!];
                   String? id = data['id'];
 

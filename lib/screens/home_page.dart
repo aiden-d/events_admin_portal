@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
                     height: 20,
                   ),
                   Text(
-                    'Version: 14',
+                    'Version: 17',
                     style: TextStyle(color: Colors.white),
                   ),
                 ],
