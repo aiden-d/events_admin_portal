@@ -60,17 +60,21 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   String? id;
   //input variables
   String? title;
-  String? summary_text;
+  String summary_text = "";
   String? link = '';
   String? info;
   int? dateTimeInt;
   //validation
   bool isImageSelected = false;
+  Image? image;
+  PickedFile? pickedImageFile;
+  Uint8List? imageData;
+  bool isImageChanged = false;
 
   //TODO
 
   //
-  int maxTitleChar = 32;
+  int maxTitleChar = 80;
   int maxComponentChar = 15;
   //validation end
   double imageSize = 200;
@@ -289,23 +293,33 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
 
   void pickImage() async {
     final _picker = ImagePicker();
-    PickedFile? pickedFile =
-        await _picker.getImage(source: ImageSource.gallery) as PickedFile;
 
-    Uint8List imageData = await pickedFile.readAsBytes();
-    imageSize = imageData.lengthInBytes / 1000;
+    PickedFile? pickedFile = await _picker.getImage(
+        source: ImageSource.gallery,
+        maxWidth: 640,
+        maxHeight: 480,
+        imageQuality: 65) as PickedFile;
 
-    if (imageSize <= 150 && pickedFile != null) {
+    if (pickedFile != null) {
+      imageData = await pickedFile.readAsBytes();
+      imageSize = imageData!.lengthInBytes / 1000;
+      pickedImageFile = pickedFile;
       setState(() {
+        image = Image.network(pickedFile.path, width: 640, height: 480);
+
+        //image = Image.network(pickedFile.path);
         print("path=" + pickedFile.path);
         isImageSelected = true;
+        isImageChanged = true;
       });
-      await uploadImage(pickedFile);
+      //await uploadImage(pickedFile);
       return;
-    } else if (imageSize > 150) {
-      return _alertDialogBuilder('Image too large',
-          'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
-    } else {
+    }
+    // else if (imageSize > 150) {
+    //   return _alertDialogBuilder('Image too large',
+    //       'Please reduce the size of the image to keep the app running smoothly and reduce data costs');
+    // }
+    else {
       print('error with picker');
       return;
     }
@@ -341,16 +355,72 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   }
 
   Future<void> uploadImage(PickedFile? pickedFile) async {
-    print("Basename = " + Path.basename(pickedFile!.path));
+    //final file = pickedImageFile;
+
+    //var imageData = await file!.readAsBytes();
+    //var imageSize = imageData.lengthInBytes;
+    print("imageSize = " + imageSize.toString());
+
+    //ImageFile imageFile =
+    //    new ImageFile(filePath: file.path, rawBytes: imageData);
+    // print("Basename = " + Path.basename(pickedFile!.path));
+    // if (imageSize > 150 * 1000) {
+    //   var input = imageFile;
+    //   var quality = 10;
+
+    //   final output = await compressInQueue(ImageFileConfiguration(
+    //       input: input,
+    //       config: Configuration(
+    //           pngCompression: PngCompression.bestSpeed,
+    //           jpgQuality: quality,
+    //           animationGifSamplingFactor: 30)));
+    //   imageFile = output;
+    //   imageSize = imageFile.sizeInBytes;
+
+    //   print("Size = " + imageSize.toString());
+    // }
+    // imageData = imageFile.rawBytes;
+
+    // double width = image!.width!;
+    // double height = image!.height!;
+    // double ratio = height / width;
+    // var newSize = 150000;
+    // var newPixels = (width * height * (newSize / imageSize)).toInt();
+    // var pixels = width * height;
+    // print("current pixels = {$pixels}");
+    // print("Target pixels = {$newPixels}");
+    // var newWidth = sqrt((newPixels) / (ratio)).toInt();
+    // print("width = ${width}");
+    // print("new width = " + newWidth.toString());
+    // var im = img.decodeImage(imageData!);
+    // var newImg = img.copyResize(im!,
+    //     width: 500,
+    //     //height: (newWidth * ratio).toInt(),
+    //     interpolation: img.Interpolation.average);
+    // var imgBytes = newImg.getBytes();
+    // //ImageFile()
+    // print("new bytes = " + imgBytes.length.toString());
+    // // //return;
+
+    // var resizeImage = ResizeImage(MemoryImage(imageData),
+    //     width: newWidth.toInt(), height: (newWidth * ratio).toInt());
+
+    // ui.Image image = new ui.Image(
+    //   image: resizeImage,
+    // );
+
     final dateTime = DateTime.now();
-    imageNameOnFirebase = "${dateTime.toString()}.jpeg";
+    //final imgBytes = await file!.readAsBytes();
+    final name = dateTime.toString();
+    imageNameOnFirebase = "${name}.jpeg";
+
+    //print(' size = ${imgBytes.length}');
 
     //imageNameOnFirebase = '${Path.basename(pickedFile.path)}';
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref(imageNameOnFirebase);
     print("made it to put");
-
-    Uint8List data = await pickedFile.readAsBytes();
+    Uint8List data = imageData!;
 
     try {
       await ref
@@ -366,6 +436,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
     } catch (e) {
       print(e);
     }
+    imageNameOnFirebase = name + "_640x480.jpeg";
 
     // try {
     //   await ref.put(_data);
@@ -429,7 +500,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
       return false;
     }
 
-    if (summary_text == null) {
+    if (summary_text == "") {
       _alertDialogBuilder('Error', 'Summary cannot be blank');
       return false;
     }
@@ -437,10 +508,8 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
       _alertDialogBuilder('Error', 'Briefing cannot be blank');
       return false;
     }
-    if (imageNameOnFirebase != null && data != null) {
-      print('image already on firebase ');
-    } else {
-      //await uploadImage();
+    if (isImageChanged) {
+      await uploadImage(pickedImageFile);
     }
     CollectionReference newsFB = FirebaseFirestore.instance.collection('News');
 
@@ -538,24 +607,26 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                         SelectItem(
                           width: 100,
                           isNoError: isImageSelected,
-                          buttonText: 'Select New Image (max 150KB)',
+                          buttonText: 'Select New Image',
                           title: isImageSelected == true
                               ? (imageFile != null
-                                  ? 'Image Selected (${imageFile!.name})'
-                                  : 'Image Selected (${imageNameOnFirebase})')
+                                  ? 'Image Selected'
+                                  : 'Image Selected')
                               : 'Image Not Selected',
                           onPressed: () async {
                             pickImage();
                           },
                         ),
+                        isImageSelected == true && image != null
+                            ? Container(
+                                width: 40,
+                                height: 22,
+                                child: image,
+                              )
+                            : SizedBox(),
                       ],
                     ),
                   ),
-                  RoundedButton(
-                      title: "Copy Bullet Point •",
-                      onPressed: () {
-                        FlutterClipboard.copy('• ');
-                      }),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 20),
@@ -565,6 +636,13 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
                           'Summary',
                           style: Constants.logoTitleStyle,
                         ),
+                        RoundedButton(
+                            title: "Insert New Bullet Point •",
+                            onPressed: () {
+                              setState(() {
+                                summary_text = summary_text + '\n• ';
+                              });
+                            }),
                         SizedBox(
                           height: 20,
                         ),

@@ -4,6 +4,7 @@ import 'package:amcham_admin_web/components/input_item.dart';
 import 'package:amcham_admin_web/components/rounded_button.dart';
 import 'package:amcham_admin_web/components/rounded_text_field.dart';
 import 'package:amcham_admin_web/components/select_item.dart';
+import 'package:amcham_admin_web/screens/manage_events_screen.dart';
 import 'package:amcham_admin_web/screens/preview_event_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   bool? isMembersOnly = false;
 
   bool isLoading = false;
-  String? id;
+  String id = "";
   bool isImageChanged = false;
 
   //input variables
@@ -1226,7 +1227,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             print("all good statement");
                             await _alertDialogBuilder('Finished',
                                 'Your event has been uploaded and should now appear on the app.');
-                            Navigator.popAndPushNamed(context, '/manageevents');
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ManageEventsScreen()));
                           }
                         },
                       ),
@@ -1256,7 +1262,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               imageRef: imageNameOnFirebase,
                               info: info,
                               speakers: itemListMaker.getAsListString(),
-                              id: id!,
+                              id: id,
                               link: link,
                               endTime: getTimeInt(endTime!),
                               //blobImage: blobImage,

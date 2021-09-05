@@ -299,7 +299,7 @@ class ManagerItem extends StatelessWidget {
                                   )));
                 })
             : SizedBox(),
-        isEditable == true
+        isEditable == true && isNews != true
             ? IconButton(
                 icon: Icon(CupertinoIcons.person_2),
                 color: Colors.white,

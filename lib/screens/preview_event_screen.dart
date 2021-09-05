@@ -171,28 +171,27 @@ class _SingleEventScreenState extends State<SingleEventScreen> {
                 ],
               ),
             ),
-            Align(
-              //TODO validate whether user has pruchased this item and then write 'owned'
-              alignment: Alignment.bottomCenter,
-              child: RoundedButton(
-                title: item.archetype == "Youtube"
-                    ? checkOwnedEvent() == true
-                        ? "Open Livesteam Link"
-                        : "Add To Calendar"
-                    : item.archetype == "MS Teams"
-                        ? (getDateTimeInt() < getCurrentDateTimeInt())
-                            ? 'Recording Not Available'
-                            : checkOwnedEvent() == true
-                                ? 'Open Teams Link'
-                                : 'Sign Up for Teams Event'
-                        : "Open Link to Event",
-                onPressed: () {},
-                radius: 10,
-                width: 350,
-                colour: Constants.blueThemeColor,
-                textStyle: TextStyle(color: Colors.white),
-              ),
-            ),
+            getDateTimeInt() < getCurrentDateTimeInt() &&
+                    item.archetype == "Youtube"
+                ? SizedBox()
+                : Align(
+                    //TODO validate whether user has pruchased this item and then write 'owned'
+                    alignment: Alignment.bottomCenter,
+                    child: RoundedButton(
+                      title: item.archetype == "Youtube"
+                          ? "Add To Calendar"
+                          : item.archetype == "MS Teams"
+                              ? (getDateTimeInt() < getCurrentDateTimeInt())
+                                  ? 'Recording Not Available'
+                                  : 'Sign Up for Teams Event'
+                              : "Open Link to Event",
+                      onPressed: () {},
+                      radius: 10,
+                      width: 350,
+                      colour: Constants.blueThemeColor,
+                      textStyle: TextStyle(color: Colors.white),
+                    ),
+                  ),
           ],
         ),
       ),
